@@ -1,2 +1,2 @@
 # ee374
-EE 374 Psets by Beining Zhou and Jiayi Liu
+EE 374 Psets by Beining (Cathy) Zhou and Jack Liu
