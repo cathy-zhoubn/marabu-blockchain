@@ -1,18 +1,35 @@
-const Net = require('net');
-const port = 8080;
-const host = 'localhost';
-const client = new Net.Socket();
-client.connect(({ port: port, host: host }), function () {
-    console.log('TCP connection established with the server.');
-    client.write('Hello, server.');
-});
-// The client can also receive data from the server by reading from its socket.
-client.on('data', function (chunk) {
-    console.log("Data received from the server: ${chunk.toString()}.");
-    // Request an end to the connection after the data has been received.
-    client.end();
-});
-client.on('end', function () {
-    console.log('Requested an end to the TCP connection');
-});
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.run_client = void 0;
+const client_host_port = 18018;
+const Net = require("net");
+const db_1 = require("./db");
+const server_1 = require("./server");
+function run_client() {
+    (0, db_1.getIPs)().then((ips) => {
+        for (let i = 0; i < ips.rows.length; i++) {
+            run_one_client(ips.rows[i]["ip"]);
+        }
+    });
+}
+exports.run_client = run_client;
+function run_one_client(host) {
+    const client = new Net.Socket();
+    var initialized = false;
+    var leftover = "";
+    client.connect({ port: client_host_port, host: host }, function () {
+        console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
+        client.write((0, server_1.send_format)(server_1.hello));
+    });
+    client.on('data', function (chunk) {
+        (0, server_1.data_handler)(chunk, leftover, client, initialized);
+        initialized = true;
+    });
+    client.on('end', function () {
+        console.log(`Closing connection with the client ${client.remoteAddress}:${client.remotePort}"`);
+    });
+    client.on('error', function (err) {
+        console.log(`Error: ${err}`);
+    });
+}
 //# sourceMappingURL=client.js.map
