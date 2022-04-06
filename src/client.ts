@@ -2,7 +2,7 @@ const client_host_port = 18018;
 const Net = require("net");
 import {getIPs} from './db';
 
-import { send_format, data_handler, hello } from "./server";
+import { send_format, data_handler, hello, get_peers} from "./server";
 
 export function run_client(){
 	getIPs().then((ips) => {
@@ -12,7 +12,7 @@ export function run_client(){
 	})
 }
 
-function run_one_client(host: string){
+export function run_one_client(host: string, port: number = client_host_port){
 	const client = new Net.Socket();
 	var initialized = false;
 	var leftover = "";
@@ -20,6 +20,7 @@ function run_one_client(host: string){
 	client.connect({ port: client_host_port, host: host }, function() {
 		console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
 		client.write(send_format(hello));
+		client.write(send_format(get_peers));
 	});
 	
 	client.on('data', function(chunk : any) {

@@ -1,5 +1,7 @@
 const Net = require("net");
 import {addIP} from './db';
+import {getIPs} from './db';
+import { run_one_client } from './client';
 
 const server_port = 18018;
 const host = "localhost";
@@ -7,6 +9,7 @@ const server = new Net.createServer();
 const version_re = /^0.8.\d$/;
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
+export const get_peers = { type: "getpeers" };
 
 function listen_handler() {
   console.log(
@@ -96,7 +99,44 @@ export function data_handler(
     initialized = true;
   }
 
-  //TODO: handle other commands. loop through json_data_array and handle the command. the only other command should be the "getpeers" message at this stage
+  if (initialized) {
+    for (let data of json_data_array){
+      // TODO: test sending peers upon recieving a peer request
+      if (data.type == "getpeers") {
+        console.log(`Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`);
+        send_peers(socket);
+      }
+      else if (data.type == "peers") {
+        connect_to_peers(data.peers);
+      }
+    }
+    
+  }
+}
+
+export function send_peers(socket: any) {
+  let peer_addresses : string[];
+  getIPs().then((ips) => {
+    for(let i=0; i<ips.rows.length; i++){
+      peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
+    }
+  })
+  socket.write(
+    send_format({
+      type: "peers",
+      peers: peer_addresses
+    })
+  );
+}
+
+export function connect_to_peers(peers: string[]) {
+  for (let peer of peers) {
+    let peer_address = peer.split(":");
+    let peer_host = peer_address[0];
+    let peer_port = parseInt(peer_address[1]);
+    console.log(`Connecting to ${peer_host}:${peer_port}`);
+    run_one_client(peer_host, peer_port);
+  }
 }
 
 export function send_format(dict: any): string {
