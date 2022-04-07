@@ -1,6 +1,5 @@
 const Net = require("net");
-import {addIP} from './db';
-import {getIPs} from './db';
+import {getIPs, addIP} from './db';
 import { run_one_client } from './client';
 
 const server_port = 18018;
@@ -22,14 +21,15 @@ export function data_handler(
   leftover: string,
   socket: any,
   initialized: boolean
-) {
+) : string{
   //processing the input
   let original: string = chunk.toString();
-  console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
+  //console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
   let tokenized = original.split("\n");
   tokenized[0] = leftover + tokenized[0];
   leftover = tokenized.pop();
   var json_data_array = [];
+  console.log(tokenized.length);
   for (let i = 0; i < tokenized.length; i++) {
     let token = tokenized[i];
     try {
@@ -64,7 +64,7 @@ export function data_handler(
     }
   }
 
-  if (json_data_array.length == 0) return;
+  if (json_data_array.length == 0) return leftover;
 
   //initial handshake
   if (!initialized) {
@@ -96,7 +96,6 @@ export function data_handler(
       socket.destroy();
       return;
     }
-    initialized = true;
   }
 
   if (initialized) {
@@ -107,15 +106,18 @@ export function data_handler(
         send_peers(socket);
       }
       else if (data.type == "peers") {
+        console.log(`Received peers message from ${socket.remoteAddress}:${socket.remotePort}`);
         connect_to_peers(data.peers);
       }
     }
     
   }
+
+  return leftover;
 }
 
 export function send_peers(socket: any) {
-  let peer_addresses : string[];
+  let peer_addresses : string[] = [];
   getIPs().then((ips) => {
     for(let i=0; i<ips.rows.length; i++){
       peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
@@ -135,6 +137,7 @@ export function connect_to_peers(peers: string[]) {
     let peer_host = peer_address[0];
     let peer_port = parseInt(peer_address[1]);
     console.log(`Connecting to ${peer_host}:${peer_port}`);
+    //addIP(peer_host);
     run_one_client(peer_host, peer_port);
   }
 }
@@ -164,14 +167,16 @@ export function run_server() {
       `A new client connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
     );
 
-    addIP(socket.remoteAddress);
+    //addIP(socket.remoteAddress);
 
     socket.write(send_format(hello));
+    socket.write(send_format(get_peers));
 
     socket.on("data", function (chunk: any) {
       //receiving logic
-      data_handler(chunk, leftover, socket, initialized);
+      leftover = data_handler(chunk, leftover, socket, initialized);
       initialized = true;
+      console.log("hi" + leftover)
     });
 
     socket.on("end", function (chunk: any) {

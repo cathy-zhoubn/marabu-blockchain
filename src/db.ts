@@ -12,22 +12,21 @@ const credentials = {
 
 const pool = new Pool(credentials);
 
-async function poolDemo() {
-  const now = await pool.query("SELECT NOW()");
-  await pool.end();
-  return now;
-}
-
 export async function getIPs() {
   const text = `SELECT * FROM addresses`;
   return pool.query(text);
 }
 
 export async function addIP(ip: string) {
-  const text = `
-	INSERT INTO addresses (ip)
-	VALUES($1)
-	`;
-  const values = [ip];
-  return pool.query(text, values);
+  // const text = `
+	// INSERT INTO addresses (ip)
+	// VALUES($1)
+	// `;
+  // const values = [ip];
+  // try {
+  //   return pool.query(text, values);
+  // } catch(e) {
+  //   console.log("Failed to add IP")
+  //   return
+  // }
 }

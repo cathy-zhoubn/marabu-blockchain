@@ -24,7 +24,8 @@ export function run_one_client(host: string, port: number = client_host_port){
 	});
 	
 	client.on('data', function(chunk : any) {
-		data_handler(chunk, leftover, client, initialized);
+		leftover = data_handler(chunk, leftover, client, initialized);
+		//console.log(leftover)
 		initialized = true;
 	});
 

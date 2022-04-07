@@ -6,15 +6,15 @@ VALUES('149.28.220.241');`. These are the hardcoded initial addresses
 
 step 2: add `config.json` file in the src directory. The file should contain the following 
 `
-	{
-		"database": {
-			"user": "postgres",
-			"host": "localhost",
-			"database": "marabu",
-			"password": "your-password",
-			"port": 5432
-		}
+{
+	"database": {
+		"user": "postgres",
+		"host": "localhost",
+		"database": "marabu",
+		"password": "your-password",
+		"port": 5432
 	}
+}
 `
 
 step 3: `npm install`
