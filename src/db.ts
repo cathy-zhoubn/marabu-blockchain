@@ -18,7 +18,7 @@ export async function getIPs() {
 }
 
 export async function addIP(ip: string) {
-  if(ip == "127.0.0.1" || ip == "localhost") return;
+  if(ip == "127.0.0.1" || ip == "localhost" || ip == "") return;
 
   const text = ` INSERT INTO addresses (ip) VALUES($1) ON CONFLICT (ip) DO NOTHING;`;
   const values = [ip];

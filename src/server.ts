@@ -6,6 +6,7 @@ const server_port = 18018;
 const host = "localhost";
 const server = new Net.createServer();
 const version_re = /^0.8.\d$/;
+const max_send_peers = 8;
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -107,6 +108,14 @@ export function data_handler(
       console.log(`Received peers message from ${socket.remoteAddress}:${socket.remotePort}`);
       connect_to_peers(data.peers);
     }
+    else{
+      socket.end(
+        send_format({
+          type: "error",
+          error: "Unsupported message type received",
+        })
+      );
+    }
   }
     
 
@@ -114,18 +123,23 @@ export function data_handler(
 }
 
 export function send_peers(socket: any) {
-  let peer_addresses : string[] = [];
+
   getIPs().then((ips) => {
+    let peer_addresses : string[] = [];
     for(let i=0; i<ips.rows.length; i++){
-      peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
+      if (!peer_addresses.includes(ips.rows[i].ip)){
+        peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
+      }
+      if(peer_addresses.length >= max_send_peers) break;
     }
+    socket.write(
+      send_format({
+        type: "peers",
+        peers: peer_addresses
+      })
+    );
   })
-  socket.write(
-    send_format({
-      type: "peers",
-      peers: peer_addresses
-    })
-  );
+  
 }
 
 export function connect_to_peers(peers: string[]) {
