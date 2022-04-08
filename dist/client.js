@@ -5,7 +5,9 @@ const client_host_port = 18018;
 const Net = require("net");
 const db_1 = require("./db");
 const server_1 = require("./server");
+let max_client_count = 20;
 let client_count = 0;
+let connected_peers = new Set();
 function num_clients() { return client_count; }
 exports.num_clients = num_clients;
 function run_client() {
@@ -18,14 +20,17 @@ function run_client() {
 }
 exports.run_client = run_client;
 function run_one_client(host) {
+    if (connected_peers.size >= max_client_count || connected_peers.has(host))
+        return;
+    connected_peers.add(host);
     const client = new Net.Socket();
     var initialized = false;
     var leftover = "";
     client.connect({ port: client_host_port, host: host }, function () {
         console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
+        (0, db_1.addIP)(host);
         client.write((0, server_1.send_format)(server_1.hello));
         client.write((0, server_1.send_format)(server_1.get_peers));
-        client_count++;
     });
     client.on('data', function (chunk) {
         leftover = (0, server_1.data_handler)(chunk, leftover, client, initialized);
@@ -34,14 +39,13 @@ function run_one_client(host) {
     });
     client.on('end', function () {
         console.log(`Closing connection with the client ${client.remoteAddress}:${client.remotePort}"`);
-        client_count--;
+        connected_peers.delete(host);
     });
     client.on('error', function (err) {
         console.log(`Error: ${err}`);
-        client_count--;
-        return 0;
+        connected_peers.delete(host);
+        return;
     });
-    return 1;
 }
 exports.run_one_client = run_one_client;
 //# sourceMappingURL=client.js.map

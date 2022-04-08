@@ -1,5 +1,5 @@
 const Net = require("net");
-import {getIPs} from './db';
+import {getIPs, addIP} from './db';
 import { run_one_client, num_clients} from './client';
 
 const server_port = 18018;
@@ -84,18 +84,32 @@ export function data_handler(
       socket.destroy();
       return;
     }
-    if (!version_re.test(hello_data.version)) {
+
+    try{
+      if (!version_re.test(hello_data.version)) {
+        console.log(
+          `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+        );
+        socket.end(
+          send_format({
+            type: "error",
+            error: "unsupported version number received",
+          })
+        );
+        socket.destroy();
+        return;
+      }
+    } catch (e) {
       console.log(
-        `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+        `Received unsupported format of hello message from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
       );
       socket.end(
         send_format({
           type: "error",
-          error: "unsupported version number received",
+          error: "unsupported format of hello message",
         })
       );
       socket.destroy();
-      return;
     }
   }
 
@@ -143,7 +157,6 @@ export function send_peers(socket: any) {
 }
 
 export function connect_to_peers(peers: string[]) {
-  let count  = 0;
   for (let peer of peers) {
     let peer_address = peer.split(":");
     let peer_host = peer_address[0];

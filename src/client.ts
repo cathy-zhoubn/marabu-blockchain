@@ -4,7 +4,7 @@ import {addIP, getIPs} from './db';
 
 import { send_format, data_handler, hello, get_peers} from "./server";
 
-let max_client_count = 20;
+let max_client_count = 2000;
 let client_count = 0;
 let connected_peers = new Set<string>();
 
