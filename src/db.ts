@@ -17,28 +17,13 @@ export async function getIPs() {
   return pool.query(text);
 }
 
-export async function IP_in_db(ip: string) {
-  const text = `SELECT * FROM addresses WHERE ip = $1`;
-  const values = [ip];
-  return pool.query(text, values);
-}
-
-export function timeout() {
-  let time = 1000;
-  return new Promise(function (resolve) {
-    setTimeout(function () {
-      resolve(Date.now());
-    }, time)
-  });
-}
-
 export async function addIP(ip: string) {
-  const text = ` INSERT INTO addresses (ip) VALUES($1)`;
+  if(ip == "127.0.0.1" || ip == "localhost") return;
+
+  const text = ` INSERT INTO addresses (ip) VALUES($1) ON CONFLICT (ip) DO NOTHING;`;
   const values = [ip];
   try {
-    let temp = pool.query(text, values);
-    let time = await timeout();
-    return temp;
+    pool.query(text, values);
   } catch(e) {
     console.log("Failed to add IP")
     return 0;

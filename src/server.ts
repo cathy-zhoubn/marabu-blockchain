@@ -1,10 +1,8 @@
 const Net = require("net");
-import {getIPs, addIP, IP_in_db} from './db';
+import {getIPs} from './db';
 import { run_one_client, num_clients} from './client';
 
 const server_port = 18018;
-const max_peers = 8;
-const max_total_peers = max_peers * 16;
 const host = "localhost";
 const server = new Net.createServer();
 const version_re = /^0.8.\d$/;
@@ -32,7 +30,6 @@ export function data_handler(
   tokenized[0] = leftover + tokenized[0];
   leftover = tokenized.pop();
   var json_data_array = [];
-  console.log(tokenized.length);
   for (let i = 0; i < tokenized.length; i++) {
     let token = tokenized[i];
     try {
@@ -101,31 +98,26 @@ export function data_handler(
     }
   }
 
-  if (initialized) {
-    for (let data of json_data_array){
-      if (data.type == "getpeers") {
-        console.log(`Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`);
-        send_peers(socket);
-      }
-      else if (data.type == "peers") {
-        console.log(`Received peers message from ${socket.remoteAddress}:${socket.remotePort}`);
-        connect_to_peers(data.peers);
-      }
+  for (let data of json_data_array){
+    if (data.type == "getpeers") {
+      console.log(`Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`);
+      send_peers(socket);
     }
-    
+    else if (data.type == "peers") {
+      console.log(`Received peers message from ${socket.remoteAddress}:${socket.remotePort}`);
+      connect_to_peers(data.peers);
+    }
   }
+    
 
   return leftover;
 }
 
 export function send_peers(socket: any) {
   let peer_addresses : string[] = [];
-  let count = 0;
   getIPs().then((ips) => {
     for(let i=0; i<ips.rows.length; i++){
       peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
-      count++;
-      if (count == max_peers) break;
     }
   })
   socket.write(
@@ -139,21 +131,9 @@ export function send_peers(socket: any) {
 export function connect_to_peers(peers: string[]) {
   let count  = 0;
   for (let peer of peers) {
-    if (count >= max_peers) break; // connect to at most 8 peers in one round
-    if (num_clients() > max_total_peers) break;// if num_clients > max_total_peers, then stop connecting
-    
-    // if peer not in database, add it
-    IP_in_db(peer).then(async (ips) => {
-      if (ips.rows.length == 0) { // if peer not in database
-        let peer_address = peer.split(":");
-        let peer_host = peer_address[0];
-        let status = run_one_client(peer_host);
-        if (status){
-          console.log(`Connected to ${peer_host}:${server_port}`);
-          let temp = await addIP(peer_host); // TODO: uncomment
-        } 
-      }
-    });
+    let peer_address = peer.split(":");
+    let peer_host = peer_address[0];
+    run_one_client(peer_host);
   }
 }
 
@@ -191,7 +171,6 @@ export function run_server() {
       //receiving logic
       leftover = data_handler(chunk, leftover, socket, initialized);
       initialized = true;
-      console.log("hi" + leftover)
     });
 
     socket.on("end", function (chunk: any) {
