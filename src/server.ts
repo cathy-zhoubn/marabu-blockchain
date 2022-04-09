@@ -3,7 +3,7 @@ import {getIPs, addIP} from './db';
 import { run_one_client, num_clients} from './client';
 
 const server_port = 18018;
-const host = "localhost";
+const host = "104.156.231.5";
 const server = new Net.createServer();
 const version_re = /^0.8.\d$/;
 const max_send_peers = 8;
@@ -26,7 +26,7 @@ export function data_handler(
 ) : string{
   //processing the input
   let original: string = chunk.toString();
-  //console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
+  // console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
   let tokenized = original.split("\n");
   tokenized[0] = leftover + tokenized[0];
   leftover = tokenized.pop();
