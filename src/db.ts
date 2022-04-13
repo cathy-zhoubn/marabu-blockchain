@@ -2,6 +2,8 @@ const { Pool } = require("pg");
 import config from './config.json';
 const db_config = config.database;
 
+const ip_re = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
 const credentials = {
   user: db_config.user,
   host: db_config.host,
@@ -18,7 +20,8 @@ export async function getIPs() {
 }
 
 export async function addIP(ip: string) {
-  if(ip == "127.0.0.1" || ip == "localhost" || ip == "") return;
+  if(ip == "127.0.0.1" || !ip_re.test(ip)) return;
+  console.log(`saving to database: ${ip}`);
 
   const text = ` INSERT INTO addresses (ip) VALUES($1) ON CONFLICT (ip) DO NOTHING;`;
   const values = [ip];

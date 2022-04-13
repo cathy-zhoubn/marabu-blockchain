@@ -1,8 +1,8 @@
 const client_host_port = 18018;
 const Net = require("net");
 import {addIP, getIPs} from './db';
+import {socket_handler} from './socket';
 
-import { send_format, data_handler, hello, get_peers} from "./server";
 
 let max_client_count = 2000;
 let client_count = 0;
@@ -29,25 +29,16 @@ export function run_one_client(host: string){
 	var leftover = "";
 
 	client.connect({ port: client_host_port, host: host }, function() {
-		console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
+		//console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
 		addIP(host);
-		client.write(send_format(hello));
-		client.write(send_format(get_peers));
-	});
-	
-	client.on('data', function(chunk : any) {
-		leftover = data_handler(chunk, leftover, client, initialized);
-		//console.log(leftover)
-		initialized = true;
+		socket_handler(client);
 	});
 
 	client.on('end', function() {
-		console.log(`Closing connection with the client ${client.remoteAddress}:${client.remotePort}"`);
 		connected_peers.delete(host);
 	});
 
 	client.on('error', function(err : any) {
-		console.log(`Error: ${err}`);
 		connected_peers.delete(host);
 		return;
 	});

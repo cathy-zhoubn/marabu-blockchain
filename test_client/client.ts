@@ -25,10 +25,10 @@ client.connect({ port: port, host: host }, function() {
     // client.write(JSON.stringify({"type": "getpeers"}) + "\n");
     
     // testing separated message
-    client.write("{\"type\": \"ge");
-    for (let i = 0; i < 1000000; i++) {
-    }
-    client.write("tpeers\"}" + "\n");
+    // client.write("{\"type\": \"ge");
+    // for (let i = 0; i < 1000000; i++) {
+    // }
+    // client.write("tpeers\"}" + "\n");
 
     // // testing errors
     // console.log("1");
