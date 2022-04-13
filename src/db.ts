@@ -14,12 +14,12 @@ const credentials = {
 
 let pool = new Pool(credentials);
 
-export async function getIPs() {
+export async function get_ips() {
   const text = `SELECT * FROM addresses`;
   return pool.query(text);
 }
 
-export async function addIP(ip: string) {
+export async function add_ip(ip: string) {
   if(ip == "127.0.0.1" || !ip_re.test(ip)) return;
   console.log(`saving to database: ${ip}`);
 
@@ -31,4 +31,16 @@ export async function addIP(ip: string) {
     console.log("Failed to add IP")
     return 0;
   }
+}
+
+export async function get_object(objectid: string){
+
+}
+
+export async function has_object(objectid: string){
+  
+}
+
+export async function add_object(objectid: string, object: string){
+  
 }

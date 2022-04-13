@@ -1,6 +1,6 @@
 const client_host_port = 18018;
 const Net = require("net");
-import {addIP, getIPs} from './db';
+import {add_ip, get_ips} from './db';
 import {socket_handler} from './socket';
 
 
@@ -12,7 +12,7 @@ export function num_clients() {return client_count;}
 
 export function run_client(){
 	client_count = 0;
-	getIPs().then((ips) => {
+	get_ips().then((ips) => {
 		for(let i=0; i<Math.min(ips.rows.length, 8); i++){
 			run_one_client(ips.rows[i]["ip"]);
 		}
@@ -30,7 +30,7 @@ export function run_one_client(host: string){
 
 	client.connect({ port: client_host_port, host: host }, function() {
 		//console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
-		addIP(host);
+		add_ip(host);
 		socket_handler(client);
 	});
 

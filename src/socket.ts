@@ -1,4 +1,4 @@
-import {getIPs} from './db';
+import {get_ips} from './db';
 import { run_one_client } from './client';
 
 const version_re = /^0.8.\d$/;
@@ -146,7 +146,7 @@ export function receive_unsupported(data:any, socket:any){
 
 
 export function send_peers(socket: any) {
-    getIPs().then((ips) => {
+    get_ips().then((ips) => {
         let peer_addresses: string[] = [];
         for (let i = 0; i < ips.rows.length; i++) {
             peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
@@ -175,7 +175,7 @@ export function socket_handler(socket: any) {
         `A new socket connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
     );
 
-    //addIP(socket.remoteAddress);
+    //add_ip(socket.remoteAddress);
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
