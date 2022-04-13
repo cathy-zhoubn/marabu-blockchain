@@ -1,9 +1,9 @@
 const Net = require("net");
 import { socket_handler } from "./socket";
-
+import config from './config.json';
 
 const server_port = 18018;
-const host = "localhost";
+const host = config.server.host;
 const server = new Net.createServer();
 
 function listen_handler() {
