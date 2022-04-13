@@ -62,72 +62,88 @@ export function data_handler(
     //initial handshake
     if (!initialized) {
         let hello_data = json_data_array.shift();
-
-        if (hello_data.type != "hello") {
-            console.log(
-                `Received other message types before the initial handshake from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-            );
-            socket.end(
-                send_format({
-                    type: "error",
-                    error: "Received other message types before the initial handshake",
-                })
-            );
-            socket.destroy();
-            return;
-        }
-
-        try {
-            if (!version_re.test(hello_data.version)) {
-                console.log(
-                    `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-                );
-                socket.end(
-                    send_format({
-                        type: "error",
-                        error: "unsupported version number received",
-                    })
-                );
-                socket.destroy();
-                return;
-            }
-        } catch (e) {
-            console.log(
-                `Received unsupported format of hello message from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-            );
-            socket.end(
-                send_format({
-                    type: "error",
-                    error: "unsupported format of hello message",
-                })
-            );
-            socket.destroy();
-        }
+        receive_hello(hello_data, socket)
     }
 
     for (let data of json_data_array) {
         if (data.type == "getpeers") {
-            console.log(
-                `Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`
-            );
-            send_peers(socket);
+            receive_getpeers(data, socket);
         } else if (data.type == "peers") {
-            console.log(
-                `Received peers message from ${socket.remoteAddress}:${socket.remotePort}`
-            );
-            connect_to_peers(data.peers);
+            receive_peers(data, socket);
         } else {
-            socket.end(
-                send_format({
-                    type: "error",
-                    error: "Unsupported message type received",
-                })
-            );
+            receive_unsupported(data, socket);
         }
     }
 
     return leftover;
 }
+
+export function receive_hello(hello_data:any, socket:any) {
+    if (hello_data.type != "hello") {
+        console.log(
+            `Received other message types before the initial handshake from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+        );
+        socket.end(
+            send_format({
+                type: "error",
+                error: "Received other message types before the initial handshake",
+            })
+        );
+        socket.destroy();
+        return;
+    }
+
+    try {
+        if (!version_re.test(hello_data.version)) {
+            console.log(
+                `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+            );
+            socket.end(
+                send_format({
+                    type: "error",
+                    error: "unsupported version number received",
+                })
+            );
+            socket.destroy();
+            return;
+        }
+    } catch (e) {
+        console.log(
+            `Received unsupported format of hello message from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+        );
+        socket.end(
+            send_format({
+                type: "error",
+                error: "unsupported format of hello message",
+            })
+        );
+        socket.destroy();
+    }
+}
+
+export function receive_getpeers(data:any, socket:any){
+    console.log(
+        `Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
+    send_peers(socket);
+}
+
+export function receive_peers(data:any, socket:any){
+    console.log(
+        `Received peers message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
+    connect_to_peers(data.peers);
+}
+
+export function receive_unsupported(data:any, socket:any){
+    socket.end(
+        send_format({
+            type: "error",
+            error: "Unsupported message type received",
+        })
+    );
+}
+
 
 export function send_peers(socket: any) {
     getIPs().then((ips) => {

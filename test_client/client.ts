@@ -11,10 +11,21 @@ console.log("created new socket")
 client.connect({ port: port, host: host }, function() {
     // If there is no error, the server has accepted the request and created a new 
     // socket dedicated to us.
-    // console.log('TCP connection established with the server.');
-
-    // The client can now send data to the server by writing to its socket.
     
+    // test_1();
+
+});
+
+// The client can also receive data from the server by reading from its socket.
+client.on('data', function(chunk : any) {
+    console.log(`Data received from the server: ${chunk.toString()}.`);
+});
+
+client.on('end', function() {
+    console.log('Requested an end to the TCP connection');
+});
+
+function test_1() {
     // testing message before hello
     // client.write(JSON.stringify({"type": "getpeers"}) + "\n");
     
@@ -41,13 +52,4 @@ client.connect({ port: port, host: host }, function() {
     // client.write(JSON.stringify({"type":"hello","version":"jd3.x"}) + "\n");
     // console.log("5");
     // client.write(JSON.stringify({"type":"hello","version":"5.8.2"}) + "\n");
-});
-
-// The client can also receive data from the server by reading from its socket.
-client.on('data', function(chunk : any) {
-    console.log(`Data received from the server: ${chunk.toString()}.`);
-});
-
-client.on('end', function() {
-    console.log('Requested an end to the TCP connection');
-});
+}
