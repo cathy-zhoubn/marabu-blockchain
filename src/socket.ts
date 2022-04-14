@@ -1,40 +1,14 @@
 import {get_ips, has_object, add_object, get_object} from './db';
-import { run_one_client } from './client';
-import sha256 from 'fast-sha256'
-var nacl = require('tweetnacl');
-nacl.util = require('tweetnacl-util');
+import { send_object, send_getobject } from './object';
+import {receive_hello, receive_getpeers, receive_peers} from './peers'
+import object_receiver from './object';
 
-const version_re = /^0.8.\d$/;
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
+
 require('events').defaultMaxListeners = Infinity;
 
 let event_target = new EventTarget();
-
-
-export default class object_receiver{
-    constructor(){
-    }
-
-    public receive_new_object(object:string){
-        const obj = new CustomEvent('received_object', {
-            detail: {
-                object: object //TODO: more specific fields?
-            }
-        });
-        // dispatch the event obj
-        window.dispatchEvent(obj);
-    }
-    public receive_object(object:string){
-        has_object(hash_object(object)).then((result) => {
-            if (!<any>result){
-                add_object(hash_object(object), object);
-                this.receive_new_object(object)
-            }
-        });
-    }
-}
-
 const obj_rec = new object_receiver();
 
 export function send_format(dict: any): string {
@@ -119,62 +93,6 @@ export function data_handler(
     return leftover;
 }
 
-export function receive_hello(hello_data:any, socket:any) {
-    if (hello_data.type != "hello") {
-        console.log(
-            `Received other message types before the initial handshake from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-        );
-        socket.end(
-            send_format({
-                type: "error",
-                error: "Received other message types before the initial handshake",
-            })
-        );
-        socket.destroy();
-        return;
-    }
-
-    try {
-        if (!version_re.test(hello_data.version)) {
-            console.log(
-                `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-            );
-            socket.end(
-                send_format({
-                    type: "error",
-                    error: "unsupported version number received",
-                })
-            );
-            socket.destroy();
-            return;
-        }
-    } catch (e) {
-        console.log(
-            `Received unsupported format of hello message from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-        );
-        socket.end(
-            send_format({
-                type: "error",
-                error: "unsupported format of hello message",
-            })
-        );
-        socket.destroy();
-    }
-}
-
-export function receive_getpeers(data:any, socket:any){
-    console.log(
-        `Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
-    send_peers(socket);
-}
-
-export function receive_peers(data:any, socket:any){
-    console.log(
-        `Received peers message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
-    connect_to_peers(data.peers);
-}
 
 export function receive_unsupported(data:any, socket:any){
     socket.end(
@@ -185,28 +103,7 @@ export function receive_unsupported(data:any, socket:any){
     );
 }
 
-export function send_peers(socket: any) {
-    get_ips().then((ips) => {
-        let peer_addresses: string[] = [];
-        for (let i = 0; i < ips.rows.length; i++) {
-            peer_addresses.push(ips.rows[i]["ip"].concat(":18018"));
-        }
-        socket.write(
-            send_format({
-                type: "peers",
-                peers: peer_addresses,
-            })
-        );
-    });
-}
 
-export function connect_to_peers(peers: string[]) {
-    for (let peer of peers) {
-        let peer_address = peer.split(":");
-        let peer_host = peer_address[0];
-        run_one_client(peer_host);
-    }
-}
 
 export function socket_handler(socket: any) {
     var initialized = false;
@@ -244,34 +141,66 @@ export function socket_handler(socket: any) {
       }) as EventListener);
 }
 
-function send_object(objid:any, socket: any) {
-    has_object(objid).then((val) => {
-        if (<any>val){
-            get_object(objid).then((result) => {
-                    //console.log(result);
-                    socket.write(send_format({
-                        type: "object",
-                        object: result
-                    }))
-            });
-        }
-    });
+
+
+
+// we have an object
+
+
+function validate_object(object:any, socket:any) {
+    if (object.hasOwnProperty("height")){
+        return validate_coinbase(object, socket);
+    }
+    if (object.hasOwnProperty("inputs")){
+        return validate_transaction(object, socket);
+    }
+    if (!object.hasOwnProperty("outputs")){
+        socket.end(
+            send_format({
+                type: "error",
+                error: "Unsupported message type received",
+            })
+        );
+    }
+    return true;
+}
+
+// {
+//     "object":{
+//         "height":0,
+//         "outputs":[{
+//             "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
+//             "value":50000000000
+//         }],
+//         "type":"transaction"
+//     },
+//     "type":"object"
+// }
+
+
+function validate_coinbase(object: any, socket:any) {
+    //TODO: implement in next assignments
+    return true;
+}
+
+function validate_transaction(object: any, socket:any){
     
 }
 
-async function send_getobject(objid: any, socket: any) {
-    has_object(objid).then((result) => {
-        if (!<any>result){
-            socket.write(send_format({
-                type: "getobject",
-                objectid: objid
-            }));
-        }
-    });
-}
 
-function hash_object(object: string) {
-    let hashed = sha256(nacl.util.decodeUTF8(object));
-    return Buffer.from(hashed).toString('hex');;
-}
-
+// {
+//     "object":{
+//         "inputs":[{
+//             "outpoint":{"index":0,
+//                 "txid":"1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
+//             },
+//             "sig":"1d0d7d774042607c69a87ac5f1cdf92bf474c25fafcc089fe667602bfefb0494726c519e92266957429ced875256e6915eb8     cea2ea66366e739415efc47a6805"
+//         }],    
+//         "outputs":[{
+//             "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
+//             "value":10
+//         }],
+//         "type":"transaction"
+//     },
+//     "type":"object"
+// }
