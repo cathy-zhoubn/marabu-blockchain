@@ -4,6 +4,9 @@ import { run_one_client } from "./client";
 const version_re = /^0.8.\d$/;
 
 export function receive_hello(hello_data:any, socket:any) {
+    console.log(
+        `Received hello message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
     if (hello_data.type != "hello") {
         console.log(
             `Received other message types before the initial handshake from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`

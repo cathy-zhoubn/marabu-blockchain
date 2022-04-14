@@ -66,7 +66,7 @@ export function data_handler(
             } else if (data.type == "getobject") {
                 send_object(data.objectid, socket);
             } else if (data.type == "object") {
-                obj_rec.receive_object(JSON.stringify(data.object));
+                obj_rec.receive_object(JSON.stringify(data.object), socket);
             } else if (data.type == "ihaveobject") {
                 let objid = data.objectid;
                 send_getobject(objid, socket);

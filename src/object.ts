@@ -17,7 +17,10 @@ export default class object_receiver{
         // dispatch the event obj
         window.dispatchEvent(obj);
     }
-    public receive_object(object:string){
+    public receive_object(object:string, socket: any){
+        console.log(
+            `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
+        );
         has_object(hash_object(object)).then((result) => {
             if (!<any>result){
                 add_object(hash_object(object), object);
@@ -28,13 +31,15 @@ export default class object_receiver{
 }
 
 export function send_object(objid:any, socket: any) {
+    console.log(
+        `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
     has_object(objid).then((val) => {
         if (<any>val){
             get_object(objid).then((result) => {
-                    //console.log(result);
                     socket.write(send_format({
                         type: "object",
-                        object: result
+                        object: JSON.parse(result)
                     }))
             });
         }
@@ -43,6 +48,9 @@ export function send_object(objid:any, socket: any) {
 }
 
 export async function send_getobject(objid: any, socket: any) {
+    console.log(
+        `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
     has_object(objid).then((result) => {
         if (!<any>result){
             socket.write(send_format({

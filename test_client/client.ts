@@ -76,16 +76,22 @@ function test2_object_grader1() {
     };
     var objstr = JSON.stringify(ob);
     let obid = hash_object(objstr);
-    objstr += "\n";
     client.write(JSON.stringify({ 
         "type": "object", 
         "object": ob 
     }) + "\n");
 
-    // client.write(JSON.stringify({ 
-    //     "type": "getobject", 
-    //     "objectid": obid
-    // }) + "\n");
+    // setTimeout(() => {
+    //     client.write(JSON.stringify({ 
+    //         "type": "getobject", 
+    //         "objectid": obid
+    //     }) + "\n");
+    //   }, 1000);
+
+    client.write(JSON.stringify({ 
+        "type": "getobject", 
+        "objectid": obid
+    }) + "\n");
     
 }
 
