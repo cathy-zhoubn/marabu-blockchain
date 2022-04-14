@@ -12,7 +12,7 @@ client.connect({ port: port, host: host }, function() {
     // If there is no error, the server has accepted the request and created a new 
     // socket dedicated to us.
     
-    // test_1();
+    test_1();
 
 });
 

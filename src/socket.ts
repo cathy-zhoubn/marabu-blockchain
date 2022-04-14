@@ -9,6 +9,34 @@ const version_re = /^0.8.\d$/;
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
 
+let event_target = new EventTarget();
+
+
+export default class object_receiver{
+    constructor(){
+    }
+
+    public receive_new_object(object:any){
+        const obj = new CustomEvent('received_object', {
+            detail: {
+                object: object //TODO: more specific fields?
+            }
+        });
+        // dispatch the event obj
+        event_target.dispatchEvent(obj);
+    }
+    public receive_object(object:any){
+        has_object(object).then((result) => {
+            if (!<any>result){
+                add_object(hash_object(object), object);
+                this.receive_new_object(object)
+            }
+        });
+    }
+}
+
+const obj_rec = new object_receiver();
+
 export function send_format(dict: any): string {
     return JSON.stringify(dict) + "\n";
 }
@@ -208,7 +236,7 @@ export function socket_handler(socket: any) {
         //console.log(`Error: ${err}`);
     });
     
-    window.addEventListener('received_object', ((event: CustomEvent) => {
+    event_target.addEventListener('received_object', ((event: CustomEvent) => {
         socket.write({
             "type": "ihaveobject", 
             "objectid": hash_object(event.detail.object)
@@ -238,28 +266,6 @@ async function send_getobject(object: any, socket: any) {
     });
 }
 
-export default class object_receiver{
-    constructor(){
-    }
-
-    public receive_new_object(object:any){
-        const obj = new CustomEvent('received_object', {
-            detail: {
-                object: object //TODO: more specific fields?
-            }
-        });
-        // dispatch the event obj
-        window.dispatchEvent(obj);
-    }
-    public receive_object(object:any){
-        has_object(object).then((result) => {
-            if (!<any>result){
-                add_object(hash_object(object), object);
-                this.receive_new_object(object)
-            }
-        });
-    }
-}
 
 function hash_object(object: any) {
     let hashed = sha256(decodeBase64(object));
