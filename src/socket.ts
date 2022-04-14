@@ -8,6 +8,7 @@ import { encode } from 'punycode';
 const version_re = /^0.8.\d$/;
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
+require('events').defaultMaxListeners = Infinity;
 
 let event_target = new EventTarget();
 
@@ -23,7 +24,7 @@ export default class object_receiver{
             }
         });
         // dispatch the event obj
-        event_target.dispatchEvent(obj);
+        window.dispatchEvent(obj);
     }
     public receive_object(object:any){
         has_object(object).then((result) => {
@@ -107,8 +108,8 @@ export function data_handler(
             } else if (data.type == "object") {
                 obj_rec.receive_object(data.object);
             } else if (data.type == "ihaveobject") {
-                let object = data.object;
-                send_getobject(object, socket);
+                let objid = data.objectid;
+                send_getobject(objid, socket);
             }
             else {
                 receive_unsupported(data, socket);
@@ -245,22 +246,26 @@ export function socket_handler(socket: any) {
 }
 
 function send_object(object:any, socket: any) {
-    has_object(object).then((result) => {
-        if (!<any>result){
-            socket.write(send_format({
-                type: "object",
-                objectid: hash_object(object)
-            }
-        ))}
+    let objid  = hash_object(object);
+    has_object(objid).then((val) => {
+        if (<any>val){
+            get_object(objid).then((result) => {
+                    socket.write(send_format({
+                        type: "object",
+                        object: result
+                    }))
+            });
+        }
     });
+    
 }
 
-async function send_getobject(object: any, socket: any) {
-    has_object(object).then((result) => {
-        if (<any>result){
+async function send_getobject(objid: any, socket: any) {
+    has_object(objid).then((result) => {
+        if (!<any>result){
             socket.write(send_format({
                 type: "getobject",
-                objectid: object
+                objectid: objid
             }));
         }
     });

@@ -1,3 +1,7 @@
+
+import { decodeBase64, encodeUTF8} from 'tweetnacl-util';
+import sha256 from "fast-sha256";
+
 // Include Nodejs' net module.
 const Net = require('net');
 // The port number and hostname of the server.
@@ -12,7 +16,11 @@ client.connect({ port: port, host: host }, function() {
     // If there is no error, the server has accepted the request and created a new 
     // socket dedicated to us.
     
-    test_1();
+    // test1();
+
+    test2_object_grader1();
+    // test2_object_grader2();
+    // test2_object_self();
 
 });
 
@@ -25,7 +33,7 @@ client.on('end', function() {
     console.log('Requested an end to the TCP connection');
 });
 
-function test_1() {
+function test1() {
     // testing message before hello
     // client.write(JSON.stringify({"type": "getpeers"}) + "\n");
     
@@ -52,4 +60,41 @@ function test_1() {
     // client.write(JSON.stringify({"type":"hello","version":"jd3.x"}) + "\n");
     // console.log("5");
     // client.write(JSON.stringify({"type":"hello","version":"5.8.2"}) + "\n");
+}
+
+function test2_object_grader1() {
+    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
+    
+    let ob = { "type": 
+        "block", 
+        "txids": [ "740bcfb434c89abe57bb2bc80290cd5495e87ebf8cd0dadb076bc50453590104" ], 
+        "nonce": "a26d92800cf58e88a5ecf37156c031a4147c2128beeaf1cca2785c93242a4c8b", 
+        "previd": "0024839ec9632d382486ba7aac7e0bda3b4bda1d4bd79be9ae78e7e1e813ddd8", 
+        "created": "1622825642", 
+        "T": "003a000000000000000000000000000000000000000000000000000000000000" 
+    };
+    let obid = hash_object(ob);
+    client.write(JSON.stringify({ 
+        "type": "object", 
+        "object": ob 
+    }) + "\n");
+
+    client.write(JSON.stringify({ 
+        "type": "getobject", 
+        "objectid": obid
+    }) + "\n");
+    
+}
+
+function test2_object_grader2(){
+
+}
+
+function test2_object_self(){
+
+}
+
+function hash_object(object: any) {
+    let hashed = sha256(decodeBase64(object));
+    return encodeUTF8(hashed);
 }
