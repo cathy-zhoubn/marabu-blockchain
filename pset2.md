@@ -18,7 +18,7 @@ export default class object_receiver {
 }
 
 if (recieve ihaveobject from peer):
-    if object not in database:
+    if object in database:
         send_getobject(object, peer)
     
 if (receive object from peer):

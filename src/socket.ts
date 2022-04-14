@@ -1,8 +1,11 @@
-import {get_ips} from './db';
+import {get_ips, has_object, add_object, get_object} from './db';
 import { run_one_client } from './client';
+import { send } from 'process';
+import sha256 from 'fast-sha256'
+import { decodeBase64, encodeUTF8} from 'tweetnacl-util';
+import { encode } from 'punycode';
 
 const version_re = /^0.8.\d$/;
-
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
 
@@ -66,12 +69,22 @@ export function data_handler(
     }
 
     for (let data of json_data_array) {
-        if (data.type == "getpeers") {
-            receive_getpeers(data, socket);
-        } else if (data.type == "peers") {
-            receive_peers(data, socket);
-        } else {
-            receive_unsupported(data, socket);
+        for (let data of json_data_array) {
+            if (data.type == "getpeers") {
+                receive_getpeers(data, socket);
+            } else if (data.type == "peers") {
+                receive_peers(data, socket);
+            } else if (data.type == "getobject") {
+                send_object(data.object, socket);
+            } else if (data.type == "object") {
+                obj_rec.receive_object(data.object);
+            } else if (data.type == "ihaveobject") {
+                let object = data.object;
+                send_getobject(object, socket);
+            }
+            else {
+                receive_unsupported(data, socket);
+            }
         }
     }
 
@@ -144,7 +157,6 @@ export function receive_unsupported(data:any, socket:any){
     );
 }
 
-
 export function send_peers(socket: any) {
     get_ips().then((ips) => {
         let peer_addresses: string[] = [];
@@ -167,6 +179,7 @@ export function connect_to_peers(peers: string[]) {
         run_one_client(peer_host);
     }
 }
+
 export function socket_handler(socket: any) {
     var initialized = false;
     var leftover = "";
@@ -194,4 +207,62 @@ export function socket_handler(socket: any) {
     socket.on("error", function (err: any) {
         //console.log(`Error: ${err}`);
     });
+    
+    window.addEventListener('received_object', ((event: CustomEvent) => {
+        socket.write({
+            "type": "ihaveobject", 
+            "objectid": hash_object(event.detail.object)
+        });
+      }) as EventListener);
 }
+
+function send_object(object:any, socket: any) {
+    has_object(object).then((result) => {
+        if (!<any>result){
+            socket.write(send_format({
+                type: "object",
+                objectid: hash_object(object)
+            }
+        ))}
+    });
+}
+
+async function send_getobject(object: any, socket: any) {
+    has_object(object).then((result) => {
+        if (<any>result){
+            socket.write(send_format({
+                type: "getobject",
+                objectid: object
+            }));
+        }
+    });
+}
+
+export default class object_receiver{
+    constructor(){
+    }
+
+    public receive_new_object(object:any){
+        const obj = new CustomEvent('received_object', {
+            detail: {
+                object: object //TODO: more specific fields?
+            }
+        });
+        // dispatch the event obj
+        window.dispatchEvent(obj);
+    }
+    public receive_object(object:any){
+        has_object(object).then((result) => {
+            if (!<any>result){
+                add_object(hash_object(object), object);
+                this.receive_new_object(object)
+            }
+        });
+    }
+}
+
+function hash_object(object: any) {
+    let hashed = sha256(decodeBase64(object));
+    return encodeUTF8(hashed);
+}
+
