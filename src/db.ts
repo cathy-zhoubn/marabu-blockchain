@@ -33,15 +33,16 @@ export async function add_ip(ip: string) {
 
 export async function get_object(objectid: string){
   const text = `SELECT * FROM objects WHERE object_id = '($1)';`;
-  const result = pool.query(text, objectid);
+  const values = [objectid];
+  const result = pool.query(text, values);
   return result.rows[0]["object"]
 }
 
 export async function has_object(objectid: string){
   const text = `SELECT COUNT(*) FROM objects WHERE object_id = '($1)';`;
-  const result = pool.query(text, objectid);
+  const values = [objectid];
+  const result = pool.query(text, values);
   return result.rows[0]["count"] > 0
-  
 }
 
 export async function add_object(objectid: string, object: string){
