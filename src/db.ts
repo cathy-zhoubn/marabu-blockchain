@@ -40,7 +40,7 @@ export async function get_object(objectid: string){
 export async function has_object(objectid: string){
   const text = `SELECT COUNT(*) FROM objects WHERE object_id = '($1)';`;
   const result = pool.query(text, objectid);
-  return result.rows[0]["count"]
+  return result.rows[0]["count"] > 0
   
 }
 
