@@ -53,7 +53,7 @@ export async function send_getobject(objid: any, socket: any) {
     });
 }
 
-function hash_object(object: string) {
+export function hash_object(object: string) {
     let hashed = sha256(nacl.util.decodeUTF8(object));
     return Buffer.from(hashed).toString('hex');;
 }
