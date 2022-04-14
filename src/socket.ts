@@ -1,9 +1,8 @@
 import {get_ips, has_object, add_object, get_object} from './db';
 import { run_one_client } from './client';
-import { send } from 'process';
 import sha256 from 'fast-sha256'
-import { decodeBase64, encodeUTF8} from 'tweetnacl-util';
-import { encode } from 'punycode';
+var nacl = require('tweetnacl');
+nacl.util = require('tweetnacl-util');
 
 const version_re = /^0.8.\d$/;
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
@@ -17,7 +16,7 @@ export default class object_receiver{
     constructor(){
     }
 
-    public receive_new_object(object:any){
+    public receive_new_object(object:string){
         const obj = new CustomEvent('received_object', {
             detail: {
                 object: object //TODO: more specific fields?
@@ -26,8 +25,8 @@ export default class object_receiver{
         // dispatch the event obj
         window.dispatchEvent(obj);
     }
-    public receive_object(object:any){
-        has_object(object).then((result) => {
+    public receive_object(object:string){
+        has_object(hash_object(object)).then((result) => {
             if (!<any>result){
                 add_object(hash_object(object), object);
                 this.receive_new_object(object)
@@ -106,7 +105,7 @@ export function data_handler(
             } else if (data.type == "getobject") {
                 send_object(data.objectid, socket);
             } else if (data.type == "object") {
-                obj_rec.receive_object(data.object);
+                obj_rec.receive_object(JSON.stringify(data.object));
             } else if (data.type == "ihaveobject") {
                 let objid = data.objectid;
                 send_getobject(objid, socket);
@@ -249,7 +248,7 @@ function send_object(objid:any, socket: any) {
     has_object(objid).then((val) => {
         if (<any>val){
             get_object(objid).then((result) => {
-                    console.log(result);
+                    //console.log(result);
                     socket.write(send_format({
                         type: "object",
                         object: result
@@ -271,10 +270,8 @@ async function send_getobject(objid: any, socket: any) {
     });
 }
 
-
-function hash_object(object: any) {
-    console.log(object);
-    let hashed = sha256(object);
-    return new TextDecoder('utf-8').decode(hashed);
+function hash_object(object: string) {
+    let hashed = sha256(nacl.util.decodeUTF8(object));
+    return Buffer.from(hashed).toString('hex');;
 }
 

@@ -1,5 +1,6 @@
 
-import { decodeBase64, encodeUTF8} from 'tweetnacl-util';
+var nacl = require('tweetnacl');
+nacl.util = require('tweetnacl-util');
 import sha256 from "fast-sha256";
 
 // Include Nodejs' net module.
@@ -73,17 +74,18 @@ function test2_object_grader1() {
         "created": "1622825642", 
         "T": "003a000000000000000000000000000000000000000000000000000000000000" 
     };
-    let objstr = JSON.stringify(ob) + "\n";
+    var objstr = JSON.stringify(ob);
     let obid = hash_object(objstr);
+    objstr += "\n";
     client.write(JSON.stringify({ 
         "type": "object", 
         "object": ob 
     }) + "\n");
 
-    client.write(JSON.stringify({ 
-        "type": "getobject", 
-        "objectid": obid
-    }) + "\n");
+    // client.write(JSON.stringify({ 
+    //     "type": "getobject", 
+    //     "objectid": obid
+    // }) + "\n");
     
 }
 
@@ -95,7 +97,7 @@ function test2_object_self(){
 
 }
 
-function hash_object(object: any) {
-    let hashed = sha256(object);
-    return new TextDecoder('utf-8').decode(hashed);
+function hash_object(object: string) {
+    let hashed = sha256(nacl.util.decodeUTF8(object));
+    return Buffer.from(hashed).toString('hex');;
 }

@@ -32,17 +32,18 @@ export async function add_ip(ip: string) {
 }
 
 export async function get_object(objectid: string){
-  const text = `SELECT * FROM objects WHERE object_id = '($1)';`;
+  const text = `SELECT * FROM objects WHERE object_id=$1;`;
   const values = [objectid];
-  const result = pool.query(text, values);
+  const result = await pool.query(text, values);
   return result.rows[0]["object"]
 }
 
 export async function has_object(objectid: string){
-  const text = `SELECT COUNT(*) FROM objects WHERE object_id = '($1)';`;
+  const text = `SELECT COUNT(*) FROM objects WHERE object_id=$1;`;
   const values = [objectid];
+  console.log(`checking if db contains objectid ${objectid}`)
   const result = await pool.query(text, values);
-  console.log("quries: ", result);
+  console.log("quries: " + result);
   const count : number = +result.rows[0]["count"];
   return count > 0
 }

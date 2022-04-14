@@ -4,6 +4,10 @@ EE 374 Psets by Beining (Cathy) Zhou and Jack Liu
 step 1: download postgresql, create a database on your computer called "marabu", then create a table called "addresses" in that database. add the IP addresses `[149.28.220.241, 149.28.204.235, 139.162.130.195]` to the table with the following SQL command: `INSERT INTO addresses (ip)
 VALUES('149.28.220.241');`. These are the hardcoded initial addresses
 
+create table objects (
+object_id TEXT PRIMARY KEY,
+object TEXT UNIQUE NOT NULL);
+
 step 2: add `config.json` file in the src directory. The file should contain the following 
 `
 {
