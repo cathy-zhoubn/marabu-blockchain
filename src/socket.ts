@@ -104,7 +104,7 @@ export function data_handler(
             } else if (data.type == "peers") {
                 receive_peers(data, socket);
             } else if (data.type == "getobject") {
-                send_object(data.object, socket);
+                send_object(data.objectid, socket);
             } else if (data.type == "object") {
                 obj_rec.receive_object(data.object);
             } else if (data.type == "ihaveobject") {
@@ -245,11 +245,11 @@ export function socket_handler(socket: any) {
       }) as EventListener);
 }
 
-function send_object(object:any, socket: any) {
-    let objid  = hash_object(object);
+function send_object(objid:any, socket: any) {
     has_object(objid).then((val) => {
         if (<any>val){
             get_object(objid).then((result) => {
+                    console.log(result);
                     socket.write(send_format({
                         type: "object",
                         object: result
@@ -273,7 +273,8 @@ async function send_getobject(objid: any, socket: any) {
 
 
 function hash_object(object: any) {
-    let hashed = sha256(decodeBase64(object));
-    return encodeUTF8(hashed);
+    console.log(object);
+    let hashed = sha256(object);
+    return new TextDecoder('utf-8').decode(hashed);
 }
 

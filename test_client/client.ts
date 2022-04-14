@@ -73,7 +73,8 @@ function test2_object_grader1() {
         "created": "1622825642", 
         "T": "003a000000000000000000000000000000000000000000000000000000000000" 
     };
-    let obid = hash_object(ob);
+    let objstr = JSON.stringify(ob) + "\n";
+    let obid = hash_object(objstr);
     client.write(JSON.stringify({ 
         "type": "object", 
         "object": ob 
@@ -95,6 +96,6 @@ function test2_object_self(){
 }
 
 function hash_object(object: any) {
-    let hashed = sha256(decodeBase64(object));
-    return encodeUTF8(hashed);
+    let hashed = sha256(object);
+    return new TextDecoder('utf-8').decode(hashed);
 }
