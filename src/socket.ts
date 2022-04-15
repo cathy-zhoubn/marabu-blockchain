@@ -1,12 +1,11 @@
-import {get_ips, has_object, add_object, get_object} from './db';
-import { send_object, send_getobject, hash_object, receive_object} from './object';
+import { send_object, send_getobject, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers'
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
 
 export const all_sockets = new Set();
-export function broadcast(all_sockets:Set<any>, data: any){
+export function broadcast(all_sockets:Set<any>, data: any){ //TODO: conditions to delete from set
     all_sockets.forEach((socket) => {
         socket.write(data);
     });
@@ -66,16 +65,16 @@ export async function data_handler(
 export async function process_data(data:any, socket:any){
     if (data.type == "hello") {}
     if (data.type == "getpeers") {
-        await receive_getpeers(data, socket);
+        receive_getpeers(data, socket);
     } else if (data.type == "peers") {
-        await receive_peers(data, socket);
+        receive_peers(data, socket);
     } else if (data.type == "getobject") {
-        await send_object(data.objectid, socket);
+        send_object(data.objectid, socket);
     } else if (data.type == "object") {
         await receive_object(await JSON.stringify(data.object), socket);
     } else if (data.type == "ihaveobject") {
         let objid = data.objectid;
-        await send_getobject(objid, socket);
+        send_getobject(objid, socket);
     }
     else {
         socket_error(data, socket);
@@ -89,22 +88,16 @@ export function socket_error(data:any, socket:any, message:string = "Unsupported
         `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
     );
     console.log(data)
+    let send_message = send_format({
+        type: "error",
+        error: message,
+    })
 
     if(kill){
-        socket.end(
-            send_format({
-                type: "error",
-                error: message,
-            })
-        );
+        socket.end(send_message);
         socket.destroy();
     } else {
-        socket.write(
-            send_format({
-                type: "error",
-                error: message,
-            })
-        );
+        socket.write(send_message);
     }
 }
 

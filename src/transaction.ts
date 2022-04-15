@@ -6,13 +6,11 @@ nacl.util = require('tweetnacl-util');
 
 export const privateKey = ed.utils.randomPrivateKey();
 
-//TODO: socket error should not close socket
 //TODO: check if object has txid : has_txid; returns: (bool: found or not; index: index of txid; object)))
 
-export async function validate_tx_object(object:string, socket:any) {
-    let tx = JSON.parse(object);
-    if (!object.hasOwnProperty("outputs")){
-        socket_error(object, socket, "Transaction object does not have outputs");
+export async function validate_tx_object(tx:any, socket:any) {
+    if (!tx.hasOwnProperty("outputs")){
+        socket_error(tx, socket, "Transaction object does not have outputs");
         return false;
     }
     for(let output of tx.outputs){
@@ -35,7 +33,7 @@ export async function validate_tx_object(object:string, socket:any) {
     }
     
     socket_error(socket, "Transaction object does not include required keys");
-    return -1;
+    return false;
 }
 
 
@@ -59,7 +57,7 @@ export async function validate_transaction(object: any, socket:any){
         return false;
     }
 
-    return input_sum == output_sum;
+    return input_sum >= output_sum;
 }
 
 let ob = {

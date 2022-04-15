@@ -25,8 +25,6 @@ export function run_one_client(host: string){
 
 	connected_peers.add(host);
 	const client = new Net.Socket();
-	var initialized = false;
-	var leftover = "";
 
 	client.connect({ port: client_host_port, host: host }, function() {
 		//console.log(`A new server connection has been established with ${client.remoteAddress}:${client.remotePort}`);
