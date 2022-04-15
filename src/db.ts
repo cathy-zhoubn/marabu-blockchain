@@ -47,7 +47,7 @@ export async function has_object(objectid: string){
 }
 
 export async function add_object(objectid: string, object: string){
-  const text = ` INSERT INTO objects (object_id, object) VALUES($1, $2);`;
+  const text = ` INSERT INTO objects (object_id, object) VALUES($1, $2) ON CONFLICT (object_id) DO NOTHING;`;
   const values = [objectid, object];
   try {
     pool.query(text, values);
