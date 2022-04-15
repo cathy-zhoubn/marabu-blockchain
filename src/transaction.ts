@@ -6,8 +6,6 @@ nacl.util = require('tweetnacl-util');
 
 export const privateKey = ed.utils.randomPrivateKey();
 
-//TODO: check if object has txid : has_txid; returns: (bool: found or not; index: index of txid; object)))
-
 export async function validate_tx_object(tx:any, socket:any) {
     if (!tx.hasOwnProperty("outputs")){
         socket_error(tx, socket, "Transaction object does not have outputs");
@@ -56,26 +54,9 @@ export async function validate_transaction(object: any, socket:any){
     if(output_sum == -1){
         return false;
     }
-
+    console.log("output_sum: " + output_sum);
     return input_sum >= output_sum;
 }
-
-let ob = {
-    "object":{
-        "inputs":[{
-            "outpoint":{"index":0,
-                "txid":"1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
-            },
-            "sig":"1d0d7d774042607c69a87ac5f1cdf92bf474c25fafcc089fe667602bfefb0494726c519e92266957429ced875256e6915eb8cea2ea66366e739415efc47a6805"
-        }],    
-        "outputs":[{
-            "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-            "value":10
-        }],
-        "type":"transaction"
-    },
-    "type":"object"
-};
 
 async function validate_tx_input(object:any, input:any, socket:any){
     if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
@@ -86,19 +67,23 @@ async function validate_tx_input(object:any, input:any, socket:any){
         socket_error(object, socket, "Some transaction input outpoint does not have txid or index");
         return -1;
     }
+
     //check if outpoint txid exists
     let [key, val] = await get_key_val(input.outpoint.txid, input.outpoint.index, socket);
-    if (key == -1 || val == -1 || !await validate_signature(input, key, socket)){
+    let no_sig = JSON.parse(JSON.stringify(object))
+    for (let i = 0; i < no_sig.inputs.length; i++){
+        no_sig.inputs[i].sig = null;
+    }
+
+    if (key == -1 || val == -1 || !await validate_signature(input, no_sig, key, socket)){
         return -1;
     }
     return val;
 }
 
-async function validate_signature(input:any, key:string, socket:any){
-    let input_copy = JSON.parse(JSON.stringify(input));
-    let sig = Uint8Array.from(Buffer.from(input_copy.sig, 'hex'));
-    delete input_copy.sig;
-    let mes = nacl.util.decodeUTF8(JSON.stringify(input_copy));
+async function validate_signature(input:any, no_sig:any, key:string, socket:any){
+    let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
+    let mes = nacl.util.decodeUTF8(JSON.stringify(no_sig));
     let isValid = await ed.verify(sig, mes, key);
     if (!isValid){
         socket_error(input, socket, "Some transaction input does not have a valid signature");
@@ -111,6 +96,7 @@ async function get_key_val(txid:string, index:number, socket:any){
     let [key, val] = await has_object(txid).then(async (val) => {
         if (<any>val){
             let [key, val] = await get_object(txid).then((prev_tx) => {
+                prev_tx = JSON.parse(prev_tx);
                 if (index >= prev_tx.outputs.length){
                     socket_error(txid, socket, "Transaction input pubkey does not match previous transaction output pubkey");
                     return [-1, -1];
@@ -128,13 +114,14 @@ async function get_key_val(txid:string, index:number, socket:any){
 }
 
 function validate_tx_output(outputs: [any], socket:any) : number{
-    var sum = 0;
+    console.log("outputs: " + outputs);
+    let sum = 0;
     for(let output of outputs){
         if(output.pubkey.length != 64){
             socket_error(output.pubkey, socket, "Some transaction output pubkey does not have a valid format");
             return -1;
         }
-        sum += output.pubkey.value;
+        sum += output.value;
     }
 
     return sum;
