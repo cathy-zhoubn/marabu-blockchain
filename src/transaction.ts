@@ -1,5 +1,5 @@
 import { send_format, socket_error} from "./socket";
-import { has_object } from "./db";
+import { has_object, get_object } from "./db";
 import * as ed from '@noble/ed25519';
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
@@ -60,25 +60,33 @@ export async function validate_transaction(object: any, socket:any){
     for (let input of object.inputs){
         if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
             socket_error(object, socket, "Some transaction input does not have outpoint or sig");
-            return false;
+            return -1;
         }
         if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")){
             socket_error(object, socket, "Some transaction input outpoint does not have txid or index");
-            return false;
+            return -1;
         }
         //check if outpoint txid exists
-        let key = await has_object(input.outpoint.txid).then(async (in_db, prev_object) => {
-            if (!<any>in_db){
-                socket_error(object, socket, "Some transaction input outpoint does not have a valid txid");
-                return false;
-            }
-            
+        let key = await has_object(input.outpoint.txid).then(async (val) => {
+                if (<any>val){
+                    let key:any = await get_object(input.outpoint.txid).then((prev_tx) => {
+                        if (input.outpoint.index >= prev_tx.outputs.length){
+                            socket_error(object, socket, "Transaction input pubkey does not match previous transaction output pubkey");
+                            return -1;
+                        }
+                        return key = prev_tx.outputs[input.outpoint.index].pubkey;
+                    });
+                    return key;
+                }
+                else{ 
+                    socket_error(object, socket, "Some transaction input outpoint does not have a valid txid");
+                        return -1;
+                }
         });
-        // TODO: which should this be?
-        // if (input.outpoint.index < ){
-        //     socket_error(object, socket, "Some transaction input outpoint has an invalid index");
-        //     return false;
-        // }
+
+        if (key != -1){
+
+        }
     }
     let message = JSON.parse(JSON.stringify(object))
     for (let input of message.inputs){
