@@ -53,6 +53,7 @@ export async function data_handler(
     if (!initialized) {
         let hello_data = json_data_array.shift();
         receive_hello(hello_data, socket)
+        initialized = true;
     }
 
     for (let data of json_data_array) {

@@ -14,6 +14,8 @@ const client = new Net.Socket();
 console.log("created new socket")
 // Send a connection request to the server.
 client.connect({ port: port, host: host }, function() {
+
+    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
     // If there is no error, the server has accepted the request and created a new 
     // socket dedicated to us.
     
@@ -41,7 +43,6 @@ function test1() {
     // client.write(JSON.stringify({"type": "getpeers"}) + "\n");
     
     // testing hello
-    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
     
     // testing getpeers
     // client.write(JSON.stringify({"type": "getpeers"}) + "\n");
@@ -76,7 +77,6 @@ var objstr = JSON.stringify(ob);
 let obid = hash_object(objstr);
 
 function test2_object_grader1() {
-    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
     // client.write(JSON.stringify({ 
     //     "type": "object", 
     //     "object": ob 
@@ -95,7 +95,6 @@ function test2_object_grader1() {
 }
 
 function test2_object_grader2(){
-    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
     client.write(JSON.stringify({ 
         "type": "getobject", 
         "objectid": obid
@@ -120,14 +119,14 @@ let tx = {
     "object":{
         "inputs":[{
             "outpoint":{
-                "index":0,
+                "index": 0,
                 "txid":"1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
             },
             "sig":"1d0d7d774042607c69a87ac5f1cdf92bf474c25fafcc089fe667602bfefb0494726c519e92266957429ced875256e6915eb8cea2ea66366e739415efc47a6805"
         }],
         "outputs":[{
             "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-            "value":10
+            "value": 10
         }],
         "type":"transaction"
     },
@@ -135,7 +134,6 @@ let tx = {
 };
 
 function test2_tx_grader1() {
-    client.write(JSON.stringify({"type": "hello", "version": "0.8.0", "agent": "Old Peking"}) + "\n");
     client.write(JSON.stringify(coinbase) + "\n");
     console.log("coinbase sent" + hash_object(JSON.stringify(coinbase.object)));
     client.write(JSON.stringify(tx) + "\n");

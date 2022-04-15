@@ -12,8 +12,12 @@ export async function validate_tx_object(tx:any, socket:any) {
         return false;
     }
     for(let output of tx.outputs){
-        if (!output.hasOwnProperty("pubkey") || !output.hasOwnProperty("value")){
-            socket_error(tx, socket, "Some transaction output does not have pubkey or value");
+        if (!output.hasOwnProperty("pubkey") || !validate_key(output.pubkey, socket) || 
+            !output.hasOwnProperty("value") || !(typeof output.value == "number") || output.value < 0){
+            console.log("output: " + output.value);
+            console.log("type: " + typeof output.value);
+            console.log(validate_key(output.pubkey, socket))
+            socket_error(tx, socket, "Some transaction output does not have correct pubkey or value");
             return false;
         }
     }
@@ -55,7 +59,11 @@ export async function validate_transaction(object: any, socket:any){
         return false;
     }
     console.log("output_sum: " + output_sum);
-    return input_sum >= output_sum;
+    if (input_sum < output_sum){
+        socket_error(object, socket, "Transaction input sum is less than output sum");
+        return false;
+    }
+    return true;
 }
 
 async function validate_tx_input(object:any, input:any, socket:any){
@@ -63,8 +71,9 @@ async function validate_tx_input(object:any, input:any, socket:any){
         socket_error(object, socket, "Some transaction input does not have outpoint or sig");
         return -1;
     }
-    if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")){
-        socket_error(object, socket, "Some transaction input outpoint does not have txid or index");
+    if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")
+        || ! (typeof input.outpoint.index == "number") || ! (input.outpoint.index >= 0) || !validate_key(input.outpoint.txid, socket)){
+        socket_error(object, socket, "Some transaction input outpoint does not have valid txid or index");
         return -1;
     }
 
@@ -82,9 +91,20 @@ async function validate_tx_input(object:any, input:any, socket:any){
 }
 
 async function validate_signature(input:any, no_sig:any, key:string, socket:any){
+    if (!is_hex(input.sig, socket)){
+        socket_error(input, socket, "Signature does not have a valid format");
+        return false;
+    }
     let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
     let mes = nacl.util.decodeUTF8(JSON.stringify(no_sig));
-    let isValid = await ed.verify(sig, mes, key);
+    let isValid = false;
+    try {
+        isValid = await ed.verify(sig, mes, key);
+    } catch (error) {
+        socket_error(input, socket, "Signature is not valid");
+        return false;
+    }
+    
     if (!isValid){
         socket_error(input, socket, "Some transaction input does not have a valid signature");
         return false;
@@ -98,7 +118,7 @@ async function get_key_val(txid:string, index:number, socket:any){
             let [key, val] = await get_object(txid).then((prev_tx) => {
                 prev_tx = JSON.parse(prev_tx);
                 if (index >= prev_tx.outputs.length){
-                    socket_error(txid, socket, "Transaction input pubkey does not match previous transaction output pubkey");
+                    socket_error(txid, socket, "Transaction input index exeeds limit");
                     return [-1, -1];
                 }
                 return [prev_tx.outputs[index].pubkey, prev_tx.outputs[index].value];
@@ -117,12 +137,33 @@ function validate_tx_output(outputs: [any], socket:any) : number{
     console.log("outputs: " + outputs);
     let sum = 0;
     for(let output of outputs){
-        if(output.pubkey.length != 64){
-            socket_error(output.pubkey, socket, "Some transaction output pubkey does not have a valid format");
+        if (!validate_key(output.pubkey, socket)){
             return -1;
         }
         sum += output.value;
     }
 
     return sum;
+}
+
+function validate_key(key:string, socket:any){
+    if (!is_hex(key, socket || key.length != 64)){
+        socket_error(key, socket, "Key does not have a valid format");
+        return false;
+    }
+    return true;
+}
+
+function is_hex(key:string, socket:any){
+    if (!(typeof key == "string")){
+        socket_error(key, socket, "Key does not have a valid format");
+        return false;
+    }
+    for (let letter of key){
+        if (!(letter >= '0' && letter <= '9') && !(letter >= 'a' && letter <= 'f')){
+            socket_error(key, socket, "Key does not have a valid format");
+            return false;
+        }
+    }
+    return true;
 }
