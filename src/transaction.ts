@@ -6,9 +6,6 @@ nacl.util = require('tweetnacl-util');
 
 export const privateKey = ed.utils.randomPrivateKey();
 
-//TODO: socket error should not close socket
-//TODO: check if object has txid : has_txid; returns: (bool: found or not; index: index of txid; object)))
-
 export async function validate_tx_object(object:string, socket:any) {
     let tx = JSON.parse(object);
     if (!object.hasOwnProperty("outputs")){
