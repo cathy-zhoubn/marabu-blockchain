@@ -4,23 +4,24 @@ import sha256 from 'fast-sha256'
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
-export function receive_object(object:string, socket:any){
-    console.log(
+export async function receive_object(object:string, socket:any){
+    await console.log(
         `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
     );
-    has_object(hash_object(object)).then((result) => {
-        console.log
+    await has_object(hash_object(object)).then(async (result) => {
         if (!<any>result){
-            add_object(hash_object(object), object);
-            broadcast(all_sockets, send_format({
+            await add_object(hash_object(object), object);
+            await broadcast(all_sockets, send_format({
                 type: "ihaveobject",
                 objectid: hash_object(object)
             }));
+            await console.log("finally finished!!!!");
         }
     });
+    
 }
 
-export function send_object(objid:any, socket: any) {
+export async function send_object(objid:any, socket: any) {
     console.log(
         `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
     );
@@ -53,8 +54,5 @@ export async function send_getobject(objid: any, socket: any) {
 
 export function hash_object(object: string) {
     let hashed = sha256(nacl.util.decodeUTF8(object));
-    console.log("hased!!!!");
     return Buffer.from(hashed).toString('hex');
-
-
 }

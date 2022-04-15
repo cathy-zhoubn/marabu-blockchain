@@ -10,7 +10,7 @@ export function validate_tx_object(object:any, socket:any) {
     } else if (object.hasOwnProperty("inputs")){
         return validate_transaction(object, socket);
     } else {
-        socket_error(socket, "Transaction object does not include required keys");
+        socket_error(object, socket, "Transaction object does not include required keys");
     }
 
     return true;

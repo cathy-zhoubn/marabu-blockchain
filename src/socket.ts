@@ -1,6 +1,8 @@
 import {get_ips, has_object, add_object, get_object} from './db';
 import { send_object, send_getobject, hash_object, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers'
+var queue = require('queue');
+var Promises = require("bluebird");
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -12,16 +14,19 @@ export function broadcast(all_sockets:Set<any>, data: any){
     });
 }
 
+export const data_queue = new queue();
+
+
 export function send_format(dict: any): string {
     return JSON.stringify(dict) + "\n";
 }
 
-export function data_handler(
+export async function data_handler(
     chunk: any,
     leftover: string,
     socket: any,
     initialized: boolean
-): string {
+) {
     //processing the input
     let original: string = chunk.toString();
     // console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
@@ -38,12 +43,12 @@ export function data_handler(
                 console.log(
                     `JSON message received from ${socket.remoteAddress}:${socket.remotePort} does not contain "type". Closing the socket.`
                 );
-                socket_error(socket);
+                socket_error(parsed, socket);
                 return;
             }
             json_data_array.push(parsed);
         } catch (e) {
-            socket_error(socket);
+            socket_error(token, socket);
             return;
         }
     }
@@ -57,33 +62,38 @@ export function data_handler(
     }
 
     for (let data of json_data_array) {
-        for (let data of json_data_array) {
-            if (data.type == "getpeers") {
-                receive_getpeers(data, socket);
-            } else if (data.type == "peers") {
-                receive_peers(data, socket);
-            } else if (data.type == "getobject") {
-                send_object(data.objectid, socket);
-            } else if (data.type == "object") {
-                console.log(JSON.stringify(data.object));
-                receive_object(JSON.stringify(data.object), socket);
-            } else if (data.type == "ihaveobject") {
-                let objid = data.objectid;
-                send_getobject(objid, socket);
-            }
-            else {
-                socket_error(socket);
-            }
-        }
+        await process_data(data, socket);
     }
-
     return leftover;
+
 }
 
-export function socket_error(socket:any, message:string = "Unsupported message type received"){
+export async function process_data(data:any, socket:any){
+    if (data.type == "hello") {}
+    if (data.type == "getpeers") {
+        await receive_getpeers(data, socket);
+    } else if (data.type == "peers") {
+        await receive_peers(data, socket);
+    } else if (data.type == "getobject") {
+        await send_object(data.objectid, socket);
+    } else if (data.type == "object") {
+        await receive_object(await JSON.stringify(data.object), socket);
+    } else if (data.type == "ihaveobject") {
+        let objid = data.objectid;
+        await send_getobject(objid, socket);
+    }
+    else {
+        socket_error(data, socket);
+    }
+
+}
+
+export function socket_error(data:any, socket:any, message:string = "Unsupported message type received"){
+
     console.log(
         `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
     );
+    console.log(data)
     socket.end(
         send_format({
             type: "error",
@@ -93,7 +103,7 @@ export function socket_error(socket:any, message:string = "Unsupported message t
     socket.destroy();
 }
 
-export function socket_handler(socket: any) {
+export async function socket_handler(socket: any) {
     var initialized = false;
     var leftover = "";
 
@@ -106,9 +116,9 @@ export function socket_handler(socket: any) {
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
-    socket.on("data", function (chunk: any) {
+    await socket.on("data", async function (chunk: any) {
         //receiving logic
-        leftover = data_handler(chunk, leftover, socket, initialized);
+        leftover = await data_handler(chunk, leftover, socket, initialized)
         initialized = true;
     });
 
