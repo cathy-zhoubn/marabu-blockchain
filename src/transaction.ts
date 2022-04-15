@@ -57,10 +57,16 @@ export function validate_coinbase(object: any, socket:any) {
 
 export async function validate_transaction(object: any, socket:any){
     for (let input of object.inputs){
-        if (!validate_input(object, input, socket)){
+        if (!validate_tx_input(object, input, socket)){
             return false;
         }
     }
+    var output_sum = validate_tx_output(object.outputs, socket);
+    if(output_sum == -1){
+        return false;
+    }
+
+    //TODO: check weak law of conservation
 
     return true;
 }
@@ -82,7 +88,7 @@ let ob = {
     "type":"object"
 }
 
-async function validate_input(object:any, input:any, socket:any){
+async function validate_tx_input(object:any, input:any, socket:any){
     if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
         socket_error(object, socket, "Some transaction input does not have outpoint or sig");
         return -1;
@@ -121,4 +127,17 @@ async function validate_input(object:any, input:any, socket:any){
         socket_error(object, socket, "Some transaction input does not have a valid signature");
         return false;
     }
+}
+
+function validate_tx_output(outputs: [any], socket:any) : number{
+    var sum = 0;
+    for(let output of outputs){
+        if(output.pubkey.length != 64){
+            socket_error(output.pubkey, socket, "Some transaction output pubkey does not have a valid format");
+            return -1;
+        }
+        sum += output.pubkey.value
+    }
+
+    return sum
 }
