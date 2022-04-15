@@ -47,7 +47,7 @@ export async function validate_transaction(object: any, socket:any){
     let input_sum = 0;
     for (let input of object.inputs){
         let val = await validate_tx_input(object, input, socket);
-        if (!val){
+        if (val == -1){
             return false
         }
         input_sum += val;

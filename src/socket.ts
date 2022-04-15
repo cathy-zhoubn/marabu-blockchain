@@ -96,6 +96,7 @@ export function socket_error(data:any, socket:any, message:string = "Unsupported
     if(kill){
         socket.end(send_message);
         socket.destroy();
+        all_sockets.delete(socket);
     } else {
         socket.write(send_message);
     }
