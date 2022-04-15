@@ -1,15 +1,16 @@
 import {get_ips, has_object, add_object, get_object} from './db';
-import { send_object, send_getobject, hash_object} from './object';
+import { send_object, send_getobject, hash_object, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers'
-import object_receiver from './object';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
 
-require('events').defaultMaxListeners = Infinity;
-
-let event_target = new EventTarget();
-const obj_rec = new object_receiver();
+export const all_sockets = new Set();
+export function broadcast(all_sockets:Set<any>, data: any){
+    all_sockets.forEach((socket) => {
+        socket.write(data);
+    });
+}
 
 export function send_format(dict: any): string {
     return JSON.stringify(dict) + "\n";
@@ -66,7 +67,8 @@ export function data_handler(
             } else if (data.type == "getobject") {
                 send_object(data.objectid, socket);
             } else if (data.type == "object") {
-                obj_rec.receive_object(JSON.stringify(data.object), socket);
+                console.log(JSON.stringify(data.object));
+                receive_object(JSON.stringify(data.object), socket);
             } else if (data.type == "ihaveobject") {
                 let objid = data.objectid;
                 send_getobject(objid, socket);
@@ -102,8 +104,9 @@ export function socket_handler(socket: any) {
     console.log(
         `A new socket connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
     );
+    all_sockets.add(socket);
 
-    //add_ip(socket.remoteAddress);
+    //add_ip(socket.remoteAddress);socket.write
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
@@ -122,11 +125,4 @@ export function socket_handler(socket: any) {
     socket.on("error", function (err: any) {
         //console.log(`Error: ${err}`);
     });
-    
-    event_target.addEventListener('received_object', ((event: CustomEvent) => {
-        socket.write({
-            "type": "ihaveobject", 
-            "objectid": hash_object(event.detail.object)
-        });
-      }) as EventListener);
 }

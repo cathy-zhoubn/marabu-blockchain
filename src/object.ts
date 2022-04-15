@@ -1,33 +1,23 @@
 import { has_object, add_object, get_object } from "./db";
-import { send_format } from "./socket";
+import { broadcast, send_format, all_sockets } from "./socket";
 import sha256 from 'fast-sha256'
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
-export default class object_receiver{
-    constructor(){
-    }
-
-    public receive_new_object(object:string){
-        const obj = new CustomEvent('received_object', {
-            detail: {
-                object: object //TODO: more specific fields?
-            }
-        });
-        // dispatch the event obj
-        window.dispatchEvent(obj);
-    }
-    public receive_object(object:string, socket: any){
-        console.log(
-            `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
-        );
-        has_object(hash_object(object)).then((result) => {
-            if (!<any>result){
-                add_object(hash_object(object), object);
-                this.receive_new_object(object)
-            }
-        });
-    }
+export function receive_object(object:string, socket:any){
+    console.log(
+        `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
+    );
+    has_object(hash_object(object)).then((result) => {
+        console.log
+        if (!<any>result){
+            add_object(hash_object(object), object);
+            broadcast(all_sockets, send_format({
+                type: "ihaveobject",
+                objectid: hash_object(object)
+            }));
+        }
+    });
 }
 
 export function send_object(objid:any, socket: any) {
@@ -63,5 +53,8 @@ export async function send_getobject(objid: any, socket: any) {
 
 export function hash_object(object: string) {
     let hashed = sha256(nacl.util.decodeUTF8(object));
-    return Buffer.from(hashed).toString('hex');;
+    console.log("hased!!!!");
+    return Buffer.from(hashed).toString('hex');
+
+
 }
