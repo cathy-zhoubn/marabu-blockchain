@@ -1,4 +1,4 @@
-import { send_format } from "./socket";
+import { send_format, socket_error } from "./socket";
 import { get_ips } from "./db";
 import { run_one_client } from "./client";
 const version_re = /^0.8.\d$/;
@@ -8,44 +8,17 @@ export function receive_hello(hello_data:any, socket:any) {
         `Received hello message from ${socket.remoteAddress}:${socket.remotePort}`
     );
     if (hello_data.type != "hello") {
-        console.log(
-            `Received other message types before the initial handshake from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-        );
-        socket.end(
-            send_format({
-                type: "error",
-                error: "Received other message types before the initial handshake",
-            })
-        );
-        socket.destroy();
+        socket_error(socket, "Received other message types before the initial handshake")
         return;
     }
 
     try {
         if (!version_re.test(hello_data.version)) {
-            console.log(
-                `Received unsupported version number from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-            );
-            socket.end(
-                send_format({
-                    type: "error",
-                    error: "unsupported version number received",
-                })
-            );
-            socket.destroy();
+            socket_error(socket, "unsupported version number received")
             return;
         }
     } catch (e) {
-        console.log(
-            `Received unsupported format of hello message from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-        );
-        socket.end(
-            send_format({
-                type: "error",
-                error: "unsupported format of hello message",
-            })
-        );
-        socket.destroy();
+        socket_error(socket, "unsupported format of hello message")
     }
 }
 

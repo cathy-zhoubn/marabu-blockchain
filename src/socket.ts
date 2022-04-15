@@ -38,14 +38,12 @@ export function data_handler(
                 console.log(
                     `JSON message received from ${socket.remoteAddress}:${socket.remotePort} does not contain "type". Closing the socket.`
                 );
-                receive_unsupported(socket);
-                socket.destroy();
+                socket_error(socket);
                 return;
             }
             json_data_array.push(parsed);
         } catch (e) {
-            receive_unsupported(socket);
-            socket.destroy();
+            socket_error(socket);
             return;
         }
     }
@@ -74,7 +72,7 @@ export function data_handler(
                 send_getobject(objid, socket);
             }
             else {
-                receive_unsupported(socket);
+                socket_error(socket);
             }
         }
     }
@@ -82,20 +80,18 @@ export function data_handler(
     return leftover;
 }
 
-
-export function receive_unsupported( socket:any){
+export function socket_error(socket:any, message:string = "Unsupported message type received"){
     console.log(
-        `Unsupported message format received from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+        `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
     );
     socket.end(
         send_format({
             type: "error",
-            error: "Unsupported message type received",
+            error: message,
         })
     );
+    socket.destroy();
 }
-
-
 
 export function socket_handler(socket: any) {
     var initialized = false;

@@ -1,16 +1,18 @@
-import { send_format, receive_unsupported} from "./socket";
+import { send_format, socket_error} from "./socket";
 
-export function validate_object(object:any, socket:any) {
+export function validate_tx_object(object:any, socket:any) {
+    if (!object.hasOwnProperty("outputs")){
+        socket_error(socket, "Transaction object does not have outputs");
+    }
+
     if (object.hasOwnProperty("height")){
         return validate_coinbase(object, socket);
-    }
-    if (object.hasOwnProperty("inputs")){
+    } else if (object.hasOwnProperty("inputs")){
         return validate_transaction(object, socket);
+    } else {
+        socket_error(socket, "Transaction object does not include required keys");
     }
-    if (!object.hasOwnProperty("outputs")){
-        console.log("Received object without outputs field from " + socket.remoteAddress + ":" + socket.remotePort);
-        receive_unsupported(socket);
-    }
+
     return true;
 }
 
