@@ -52,8 +52,16 @@ export function send_peers(socket: any) {
     });
 }
 
+function isIterable(obj : any) {
+    // checks for null and undefined
+    if (obj == null) {
+      return false;
+    }
+    return typeof obj[Symbol.iterator] === 'function';
+  }
+
 export function connect_to_peers(peers: string[]) {
-    if (peers == null) return;
+    if (isIterable(peers) == false) return;
     for (let peer of peers) {
         let peer_address = peer.split(":");
         let peer_host = peer_address[0];
