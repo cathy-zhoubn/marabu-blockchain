@@ -103,7 +103,7 @@ export function socket_error(data:any, socket:any, message:string = "Unsupported
     socket.destroy();
 }
 
-export async function socket_handler(socket: any) {
+export function socket_handler(socket: any) {
     var initialized = false;
     var leftover = "";
 
@@ -116,7 +116,7 @@ export async function socket_handler(socket: any) {
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
-    await socket.on("data", async function (chunk: any) {
+    socket.on("data", async function (chunk: any) {
         //receiving logic
         leftover = await data_handler(chunk, leftover, socket, initialized)
         initialized = true;
