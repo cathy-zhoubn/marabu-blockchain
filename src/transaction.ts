@@ -9,32 +9,33 @@ export const privateKey = ed.utils.randomPrivateKey();
 //TODO: socket error should not close socket
 //TODO: check if object has txid : has_txid; returns: (bool: found or not; index: index of txid; object)))
 
-export async function validate_tx_object(object:any, socket:any) {
+export async function validate_tx_object(object:string, socket:any) {
+    let tx = JSON.parse(object);
     if (!object.hasOwnProperty("outputs")){
         socket_error(object, socket, "Transaction object does not have outputs");
         return false;
     }
-    for(let output of object.outputs){
+    for(let output of tx.outputs){
         if (!output.hasOwnProperty("pubkey") || !output.hasOwnProperty("value")){
-            socket_error(object, socket, "Some transaction output does not have pubkey or value");
+            socket_error(tx, socket, "Some transaction output does not have pubkey or value");
             return false;
         }
     }
 
-    if (object.hasOwnProperty("height")){
-        return validate_coinbase(object, socket);
+    if (tx.hasOwnProperty("height")){
+        return validate_coinbase(tx, socket);
     } 
 
-    else if (object.hasOwnProperty("inputs")){
-        if(object.inputs.length == 0){
-            socket_error(object, socket, "Transaction does not have any inputs");
+    else if (tx.hasOwnProperty("inputs")){
+        if(tx.inputs.length == 0){
+            socket_error(tx, socket, "Transaction does not have any inputs");
             return false;
         }
-        return await validate_transaction(object, socket);
+        return await validate_transaction(tx, socket);
     }
     
     socket_error(socket, "Transaction object does not include required keys");
-    return false;
+    return -1;
 }
 
 // {
@@ -56,13 +57,11 @@ export function validate_coinbase(object: any, socket:any) {
 }
 
 export async function validate_transaction(object: any, socket:any){
+    let input_sum = 0;
     for (let input of object.inputs){
-        if (!validate_input(object, input, socket)){
-            return false;
-        }
+        input_sum  += await validate_input(object, input, socket);
     }
-
-    return true;
+    return input_sum;
 }
 
 let ob = {
@@ -92,33 +91,42 @@ async function validate_input(object:any, input:any, socket:any){
         return -1;
     }
     //check if outpoint txid exists
-    let key = await has_object(input.outpoint.txid).then(async (val) => {
-            if (<any>val){
-                let key:any = await get_object(input.outpoint.txid).then((prev_tx) => {
-                    if (input.outpoint.index >= prev_tx.outputs.length){
-                        socket_error(object, socket, "Transaction input pubkey does not match previous transaction output pubkey");
-                        return -1;
-                    }
-                    return key = prev_tx.outputs[input.outpoint.index].pubkey;
-                });
-                return key;
-            }
-            else{ 
-                socket_error(object, socket, "Some transaction input outpoint does not have a valid txid");
-                    return -1;
-            }
-    });
-
-    if (key == -1){
-        return false;
+    let [key, val] = await get_key_val(input.outpoint.txid, input.outpoint.index, socket);
+    if (key == -1 || val == -1 || !await validate_signature(input, key, socket)){
+        return -1;
     }
+    return val;
+}
+
+async function validate_signature(input:any, key:string, socket:any){
     let input_copy = JSON.parse(JSON.stringify(input));
     let sig = Uint8Array.from(Buffer.from(input_copy.sig, 'hex'))
     delete input_copy.sig;
     let mes = nacl.util.decodeUTF8(JSON.stringify(input_copy));
     let isValid = await ed.verify(sig, mes, key);
     if (!isValid){
-        socket_error(object, socket, "Some transaction input does not have a valid signature");
+        socket_error(input, socket, "Some transaction input does not have a valid signature");
         return false;
     }
+    return true;
+}
+
+async function get_key_val(txid:string, index:number, socket:any){
+    let [key, val] = await has_object(txid).then(async (val) => {
+        if (<any>val){
+            let [key, val] = await get_object(txid).then((prev_tx) => {
+                if (index >= prev_tx.outputs.length){
+                    socket_error(txid, socket, "Transaction input pubkey does not match previous transaction output pubkey");
+                    return [-1, -1];
+                }
+                return [prev_tx.outputs[index].pubkey, prev_tx.outputs[index].value];
+            });
+            return [key, val];
+        }
+        else{ 
+            socket_error(txid, socket, "Some transaction input outpoint does not have a valid txid");
+                return [-1, -1];
+        }
+    });
+    return [key, val];
 }
