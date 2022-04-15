@@ -56,46 +56,13 @@ export function validate_coinbase(object: any, socket:any) {
 }
 
 export async function validate_transaction(object: any, socket:any){
-    let keys = [];
     for (let input of object.inputs){
-        if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
-            socket_error(object, socket, "Some transaction input does not have outpoint or sig");
-            return -1;
-        }
-        if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")){
-            socket_error(object, socket, "Some transaction input outpoint does not have txid or index");
-            return -1;
-        }
-        //check if outpoint txid exists
-        let key = await has_object(input.outpoint.txid).then(async (val) => {
-                if (<any>val){
-                    let key:any = await get_object(input.outpoint.txid).then((prev_tx) => {
-                        if (input.outpoint.index >= prev_tx.outputs.length){
-                            socket_error(object, socket, "Transaction input pubkey does not match previous transaction output pubkey");
-                            return -1;
-                        }
-                        return key = prev_tx.outputs[input.outpoint.index].pubkey;
-                    });
-                    return key;
-                }
-                else{ 
-                    socket_error(object, socket, "Some transaction input outpoint does not have a valid txid");
-                        return -1;
-                }
-        });
-
-        if (key != -1){
-
+        if (!validate_input(object, input, socket)){
+            return false;
         }
     }
-    let message = JSON.parse(JSON.stringify(object))
-    for (let input of message.inputs){
-        let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'))
-        delete input.sig;
-        let mes = nacl.util.decodeUTF8(JSON.stringify(input));
-        let isValid = await ed.verify(sig, message, publicKey);
-    }
-    
+
+    return true;
 }
 
 let ob = {
@@ -104,7 +71,7 @@ let ob = {
             "outpoint":{"index":0,
                 "txid":"1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
             },
-            "sig":"1d0d7d774042607c69a87ac5f1cdf92bf474c25fafcc089fe667602bfefb0494726c519e92266957429ced875256e6915eb8     cea2ea66366e739415efc47a6805"
+            "sig":"1d0d7d774042607c69a87ac5f1cdf92bf474c25fafcc089fe667602bfefb0494726c519e92266957429ced875256e6915eb8cea2ea66366e739415efc47a6805"
         }],    
         "outputs":[{
             "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
@@ -115,11 +82,43 @@ let ob = {
     "type":"object"
 }
 
-(async () => {
-    // keys, messages & other inputs can be Uint8Arrays or hex strings
-    // Uint8Array.from([0xde, 0xad, 0xbe, 0xef]) === 'deadbeef'
-    const message = Uint8Array.from([0xab, 0xbc, 0xcd, 0xde]);
-    const publicKey = await ed.getPublicKey(privateKey);
-    const signature = await ed.sign(message, privateKey);
-    const isValid = await ed.verify(signature, message, publicKey);
-  })();
+async function validate_input(object:any, input:any, socket:any){
+    if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
+        socket_error(object, socket, "Some transaction input does not have outpoint or sig");
+        return -1;
+    }
+    if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")){
+        socket_error(object, socket, "Some transaction input outpoint does not have txid or index");
+        return -1;
+    }
+    //check if outpoint txid exists
+    let key = await has_object(input.outpoint.txid).then(async (val) => {
+            if (<any>val){
+                let key:any = await get_object(input.outpoint.txid).then((prev_tx) => {
+                    if (input.outpoint.index >= prev_tx.outputs.length){
+                        socket_error(object, socket, "Transaction input pubkey does not match previous transaction output pubkey");
+                        return -1;
+                    }
+                    return key = prev_tx.outputs[input.outpoint.index].pubkey;
+                });
+                return key;
+            }
+            else{ 
+                socket_error(object, socket, "Some transaction input outpoint does not have a valid txid");
+                    return -1;
+            }
+    });
+
+    if (key == -1){
+        return false;
+    }
+    let input_copy = JSON.parse(JSON.stringify(input));
+    let sig = Uint8Array.from(Buffer.from(input_copy.sig, 'hex'))
+    delete input_copy.sig;
+    let mes = nacl.util.decodeUTF8(JSON.stringify(input_copy));
+    let isValid = await ed.verify(sig, mes, key);
+    if (!isValid){
+        socket_error(object, socket, "Some transaction input does not have a valid signature");
+        return false;
+    }
+}
