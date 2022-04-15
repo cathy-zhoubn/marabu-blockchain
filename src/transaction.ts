@@ -3,17 +3,37 @@ import { send_format, socket_error} from "./socket";
 export function validate_tx_object(object:any, socket:any) {
     if (!object.hasOwnProperty("outputs")){
         socket_error(socket, "Transaction object does not have outputs");
+        return false;
+    }
+    for(let output of object.outputs){
+        if (!output.hasOwnProperty("pubkey") || !output.hasOwnProperty("value")){
+            socket_error(socket, "Some transaction output does not have pubkey or value");
+            return false;
+        }
     }
 
     if (object.hasOwnProperty("height")){
         return validate_coinbase(object, socket);
     } else if (object.hasOwnProperty("inputs")){
+        if(object.inputs.length == 0){
+            socket_error(socket, "Transaction does not have any inputs");
+            return false;
+        }
+        for(let input of object.inputs){
+            if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
+                socket_error(socket, "Some transaction input does not have outpoint or sig");
+                return false;
+            }
+            if(!input.outpoint.hasOwnProperty("index") || !input.outpoint.hasOwnProperty("txid")){
+                socket_error(socket, "Some transaction input outpoint does not have index or txid");
+                return false;
+            }
+        }
         return validate_transaction(object, socket);
-    } else {
-        socket_error(socket, "Transaction object does not include required keys");
     }
-
-    return true;
+    
+    socket_error(socket, "Transaction object does not include required keys");
+    return false;
 }
 
 // {
