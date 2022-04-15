@@ -102,7 +102,7 @@ export function socket_error(data:any, socket:any, message:string = "Unsupported
     }
 }
 
-export function socket_handler(socket: any) {
+export async function socket_handler(socket: any) {
     var initialized = false;
     var leftover = "";
 
@@ -115,10 +115,14 @@ export function socket_handler(socket: any) {
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
-    socket.on("data", async function (chunk: any) {
+    await socket.on("data", async function (chunk: any) {
         //receiving logic
-        leftover = await data_handler(chunk, leftover, socket, initialized)
-        initialized = true;
+        if(!initialized){
+            initialized = true
+            leftover = await data_handler(chunk, leftover, socket, false)
+        } else {
+            leftover = await data_handler(chunk, leftover, socket, initialized)
+        }
     });
 
     socket.on("end", function (chunk: any) {
