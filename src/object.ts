@@ -1,27 +1,42 @@
 import { has_object, add_object, get_object } from "./db";
 import { broadcast, send_format, all_sockets } from "./socket";
 import sha256 from 'fast-sha256'
+import { validate_tx_object } from "./transaction";
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
 export async function receive_object(object:string, socket:any){
-    await console.log(
+    console.log(
         `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
     );
     await has_object(hash_object(object)).then(async (result) => {
         if (!<any>result){
-            await add_object(hash_object(object), object);
-            await broadcast(all_sockets, send_format({
-                type: "ihaveobject",
-                objectid: hash_object(object)
-            }));
-            await console.log("finally finished!!!!");
+
+            var save = true;
+
+            let json_obj = JSON.parse(object);
+            if(json_obj.hasOwnProperty("type")){
+                if(json_obj.type == "transaction"){
+                    await validate_tx_object(json_obj, socket).then((result) => {
+                        save = result
+                    });
+                } else if (json_obj.type == "block"){
+                    //TODO: add block logic
+                }
+            }
+
+            if(save){
+                await add_object(hash_object(object), object);
+                broadcast(all_sockets, send_format({
+                    type: "ihaveobject",
+                    objectid: hash_object(object)
+                }));
+            }
         }
     });
-    
 }
 
-export async function send_object(objid:any, socket: any) {
+export function send_object(objid:any, socket: any) {
     console.log(
         `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
     );
@@ -35,10 +50,9 @@ export async function send_object(objid:any, socket: any) {
             });
         }
     });
-    
 }
 
-export async function send_getobject(objid: any, socket: any) {
+export function send_getobject(objid: any, socket: any) {
     console.log(
         `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
     );
