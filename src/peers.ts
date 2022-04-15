@@ -8,17 +8,17 @@ export function receive_hello(hello_data:any, socket:any) {
         `Received hello message from ${socket.remoteAddress}:${socket.remotePort}`
     );
     if (hello_data.type != "hello") {
-        socket_error(hello_data, socket, "Received other message types before the initial handshake")
+        socket_error(hello_data, socket, "Received other message types before the initial handshake", true)
         return;
     }
 
     try {
         if (!version_re.test(hello_data.version)) {
-            socket_error(hello_data,socket, "unsupported version number received")
+            socket_error(hello_data,socket, "unsupported version number received", true)
             return;
         }
     } catch (e) {
-        socket_error(hello_data, socket, "unsupported format of hello message")
+        socket_error(hello_data, socket, "unsupported format of hello message", true)
     }
 }
 

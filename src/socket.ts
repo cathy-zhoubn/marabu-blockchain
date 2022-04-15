@@ -1,8 +1,6 @@
 import {get_ips, has_object, add_object, get_object} from './db';
 import { send_object, send_getobject, hash_object, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers'
-var queue = require('queue');
-var Promises = require("bluebird");
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -13,9 +11,6 @@ export function broadcast(all_sockets:Set<any>, data: any){
         socket.write(data);
     });
 }
-
-export const data_queue = new queue();
-
 
 export function send_format(dict: any): string {
     return JSON.stringify(dict) + "\n";
@@ -88,19 +83,29 @@ export async function process_data(data:any, socket:any){
 
 }
 
-export function socket_error(data:any, socket:any, message:string = "Unsupported message type received"){
+export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){
 
     console.log(
         `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
     );
     console.log(data)
-    socket.end(
-        send_format({
-            type: "error",
-            error: message,
-        })
-    );
-    socket.destroy();
+
+    if(kill){
+        socket.end(
+            send_format({
+                type: "error",
+                error: message,
+            })
+        );
+        socket.destroy();
+    } else {
+        socket.write(
+            send_format({
+                type: "error",
+                error: message,
+            })
+        );
+    }
 }
 
 export function socket_handler(socket: any) {
