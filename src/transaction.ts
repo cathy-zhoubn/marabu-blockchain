@@ -38,17 +38,6 @@ export async function validate_tx_object(object:string, socket:any) {
     return -1;
 }
 
-// {
-//     "object":{
-//         "height":0,
-//         "outputs":[{
-//             "pubkey":"8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-//             "value":50000000000
-//         }],
-//         "type":"transaction"
-//     },
-//     "type":"object"
-// }
 
 
 export function validate_coinbase(object: any, socket:any) {
@@ -59,9 +48,18 @@ export function validate_coinbase(object: any, socket:any) {
 export async function validate_transaction(object: any, socket:any){
     let input_sum = 0;
     for (let input of object.inputs){
-        input_sum  += await validate_input(object, input, socket);
+        let val = await validate_tx_input(object, input, socket);
+        if (!val){
+            return false
+        }
+        input_sum += val;
     }
-    return input_sum;
+    var output_sum = validate_tx_output(object.outputs, socket);
+    if(output_sum == -1){
+        return false;
+    }
+
+    return input_sum == output_sum;
 }
 
 let ob = {
@@ -79,9 +77,9 @@ let ob = {
         "type":"transaction"
     },
     "type":"object"
-}
+};
 
-async function validate_input(object:any, input:any, socket:any){
+async function validate_tx_input(object:any, input:any, socket:any){
     if (!input.hasOwnProperty("outpoint") || !input.hasOwnProperty("sig")){
         socket_error(object, socket, "Some transaction input does not have outpoint or sig");
         return -1;
@@ -100,7 +98,7 @@ async function validate_input(object:any, input:any, socket:any){
 
 async function validate_signature(input:any, key:string, socket:any){
     let input_copy = JSON.parse(JSON.stringify(input));
-    let sig = Uint8Array.from(Buffer.from(input_copy.sig, 'hex'))
+    let sig = Uint8Array.from(Buffer.from(input_copy.sig, 'hex'));
     delete input_copy.sig;
     let mes = nacl.util.decodeUTF8(JSON.stringify(input_copy));
     let isValid = await ed.verify(sig, mes, key);
@@ -129,4 +127,17 @@ async function get_key_val(txid:string, index:number, socket:any){
         }
     });
     return [key, val];
+}
+
+function validate_tx_output(outputs: [any], socket:any) : number{
+    var sum = 0;
+    for(let output of outputs){
+        if(output.pubkey.length != 64){
+            socket_error(output.pubkey, socket, "Some transaction output pubkey does not have a valid format");
+            return -1;
+        }
+        sum += output.pubkey.value;
+    }
+
+    return sum;
 }
