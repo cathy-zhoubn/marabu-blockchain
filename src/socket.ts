@@ -1,6 +1,7 @@
 import { send_object, send_getobject, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers';
 import {receive_block} from './block';
+import { send } from 'process';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -91,22 +92,24 @@ export async function process_data(data:any, socket:any){
 
 export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){
 
-    console.log(
-        `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-    );
+    // console.log(
+    //     `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+    // );
     console.log(data)
     let send_message = send_format({
         type: "error",
         error: message,
     })
+    console.log(send_message) // TODO: remove
 
-    if(kill){
-        socket.end(send_message);
-        socket.destroy();
-        all_sockets.delete(socket);
-    } else {
-        socket.write(send_message);
-    }
+    // TODO: get this back!!!
+    // if(kill){
+    //     socket.end(send_message);
+    //     socket.destroy();
+    //     all_sockets.delete(socket);
+    // } else {
+    //     socket.write(send_message);
+    // }
 }
 
 export async function socket_handler(socket: any) {

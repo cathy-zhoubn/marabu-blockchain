@@ -16,16 +16,6 @@ let bl = {
     "note": "A sample block" 
 }
 
-let gen = { 
-    "T": "00000002af000000000000000000000000000000000000000000000000000000", 
-    "created": 1624219079, 
-    "miner": "dionyziz", 
-    "nonce": "0000000000000000000000000000000000000000000000000000002634878840", 
-    "note": "The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage", 
-    "previd": null, 
-    "txids": [], 
-    "type": "block" 
-}
 
 const coinbase_reward = 50e12;
 
@@ -37,15 +27,13 @@ export async function receive_block(data: any, socket: any) {
 }
 
 export async function validate_block(data:any, socket:any){
+    let blockid = hash_string(JSON.stringify(data));
     if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
-        console.log(
-            `Block message received from ${socket.remoteAddress}:${socket.remotePort} does not have valid target.`
-        );
-        socket_error(data, socket);
+        socket_error(data, socket, "Block does not have valid target.");
         return false;
     }
     // Check proof of work
-    if (!valid_pow(data, socket)) return false;
+    // if (!valid_pow(data, blockid, socket)) return false;
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
@@ -54,7 +42,7 @@ export async function validate_block(data:any, socket:any){
         socket_error(data, socket, "Block does not have a valid list of txids.");
         return false;
     }
-    if (!data.hasOwnProperty("nonce") || is_hex(data.nonce, socket) || data.nonce.length != 64){
+    if (!data.hasOwnProperty("nonce") || !is_hex(data.nonce, socket) || data.nonce.length != 64){
         socket_error(data, socket, "Block does not have a valid nonce.");
         return false;
     }
@@ -80,17 +68,22 @@ export async function validate_block(data:any, socket:any){
     // validate all txids
     if (!await validate_txids(data, socket)) return false;
     else {
-        // TODO: update UTXO database
+        // if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
+        //     socket_error(data, socket, "Block does not have valid UTXO.");
+        //     return false;
+        // }
     }
+
+    console.log("completed")
     
 
 }
 
-function valid_pow(block: any, socket: any) {
-    let block_string = JSON.stringify(block);
-    let hash_num = parseInt(hash_string(block_string), 16);
+function valid_pow(block: any, blockid:string, socket: any,) {
+    console.log(blockid);
+    let blockid_num = parseInt(blockid, 16);
     let target_num = parseInt(block.T, 16);
-    if (hash_num >= target_num){
+    if (blockid_num >= target_num){
         socket_error(block, socket, "Block does not meet proof of work requirements.");
         return false;
     }
@@ -144,7 +137,10 @@ async function validate_coinbase_conservation(block: any, coinbase_tx:any, socke
             max += output.value;
         }
     }
-    if (coinbase_tx.)
+    if (coinbase_tx.outputs[0].value > max){
+        socket_error(block, socket, "Coinbase transaction does not meet conservation requirements.");
+        return false;
+    }
     return true;
 }
 
@@ -153,3 +149,10 @@ function validate_genesis(data: any, socket: any) {
     return true;
 }
 
+
+
+
+
+// let x = validate_block(JSON.parse(), null);
+// console.log(hash_string(JSON.stringify(block1)));
+// console.log(x);
