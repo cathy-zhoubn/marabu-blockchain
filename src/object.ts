@@ -12,14 +12,14 @@ export async function receive_object(object:string, socket:any){
     await has_object(hash_string(object)).then(async (result) => {
         if (!<any>result){
 
-            var save = true;
+            var save = false;
 
             let json_obj = JSON.parse(object);
             if(json_obj.hasOwnProperty("type")){
                 if(json_obj.type == "transaction"){
                     save = await validate_tx_object(json_obj, socket)
                 } else if (json_obj.type == "block"){
-                    save = await validate_block(json_obj, socket);
+                    save = await validate_block(json_obj, socket)
                 }
             }
 
@@ -48,6 +48,7 @@ export function send_object(objid:any, socket: any) {
             });
         }
     });
+    
 }
 
 export function send_getobject(objid: any, socket: any) {

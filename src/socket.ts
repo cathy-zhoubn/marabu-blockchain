@@ -93,24 +93,23 @@ export async function process_data(data:any, socket:any){
 
 export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){
 
-    // console.log(
-    //     `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-    // );
+    console.log(
+        `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+    );
     console.log(data)
     let send_message = send_format({
         type: "error",
         error: message,
     })
-    console.log(send_message) // TODO: remove
+    console.log(send_message) 
 
-    // TODO: get this back!!!
-    // if(kill){
-    //     socket.end(send_message);
-    //     socket.destroy();
-    //     all_sockets.delete(socket);
-    // } else {
-    //     socket.write(send_message);
-    // }
+    if(kill){
+        socket.end(send_message);
+        socket.destroy();
+        all_sockets.delete(socket);
+    } else {
+        socket.write(send_message);
+    }
 }
 
 export async function socket_handler(socket: any) {

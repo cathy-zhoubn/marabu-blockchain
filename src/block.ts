@@ -19,12 +19,12 @@ export async function receive_block(data: any, socket: any) {
 
 export async function validate_block(data:any, socket:any){
     let blockid = hash_string(canonicalize(data));
-    // if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
-    //     socket_error(data, socket, "Block does not have valid target.");
-    //     return false;
-    // }
+    if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
+        socket_error(data, socket, "Block does not have valid target.");
+        return false;
+    }
     // Check proof of work
-    // if (!valid_pow(data, blockid, socket)) return false;
+    if (!valid_pow(data, blockid, socket)) return false;
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
@@ -66,6 +66,7 @@ export async function validate_block(data:any, socket:any){
     }
 
     console.log("completed") //TODO : delete
+    return true;
 
 }
 
@@ -80,11 +81,11 @@ function valid_pow(block: any, blockid:string, socket: any,) {
 }
 
 async function validate_txids(block:any, socket:any) {
-    // TODO: wait til others get back with object or error?
     // send getobject if txid is not in db
     for (let txid of block.txids){
         await send_getobject(txid, socket);
     }
+    //TODO add waiting
     // confirm all txids are in the database
     for (let txid of block.txids){
         if (!await has_object(txid)){
@@ -168,7 +169,7 @@ let trans_2 = {
             "index": 0 
         }, 
         "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], 
-        "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 51000 } ] }
+        "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 510000000000000 }]}
 // let x = validate_block(JSON.parse(), null);
 console.log(hash_string(canonicalize(trans_2)));
 // console.log(x);
