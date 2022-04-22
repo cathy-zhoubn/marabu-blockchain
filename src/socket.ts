@@ -18,18 +18,18 @@ export function send_format(dict: any): string {
     return canonicalize(dict) + "\n";
 }
 
-export async function data_handler(
+export function data_handler(
     chunk: any,
-    leftover: string,
+    leftover: any,
     socket: any,
-    initialized: boolean
+    initialized: any
 ) {
     //processing the input
     let original: string = chunk.toString();
     // console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
     let tokenized = original.split("\n");
-    tokenized[0] = leftover + tokenized[0];
-    leftover = tokenized.pop();
+    tokenized[0] = leftover.value + tokenized[0];
+    leftover.value = tokenized.pop();
     var json_data_array = [];
     for (let i = 0; i < tokenized.length; i++) {
         let token = tokenized[i];
@@ -50,20 +50,18 @@ export async function data_handler(
         }
     }
 
-    if (json_data_array.length == 0) return leftover;
+    if (json_data_array.length == 0) return;
 
     //initial handshake
-    if (!initialized) {
+    if (!initialized.init) {
         let hello_data = json_data_array.shift();
         receive_hello(hello_data, socket)
-        initialized = true;
+        initialized.init = true;
     }
 
     for (let data of json_data_array) {
-        await process_data(data, socket);
+        process_data(data, socket);
     }
-    return leftover;
-
 }
 
 export async function process_data(data:any, socket:any){
@@ -75,15 +73,13 @@ export async function process_data(data:any, socket:any){
     } else if (data.type == "getobject") {
         send_object(data.objectid, socket);
     } else if (data.type == "object") {
-        await receive_object(await canonicalize(data.object), socket);
+        receive_object(canonicalize(data.object), socket);
     } else if (data.type == "ihaveobject") {
         let objid = data.objectid;
         console.log(
             `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
         );
         send_getobject(objid, socket);
-    } else if (data.type == "block") {
-        await receive_block(data, socket); 
     }
     else {
         socket_error(data, socket);
@@ -112,9 +108,9 @@ export function socket_error(data:any, socket:any, message:string = "Unsupported
     }
 }
 
-export async function socket_handler(socket: any) {
-    var initialized = false;
-    var leftover = "";
+export function socket_handler(socket: any) {
+    var initialized = {init: false};
+    var leftover = { value: ""};
 
     console.log(
         `A new socket connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
@@ -125,14 +121,8 @@ export async function socket_handler(socket: any) {
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
 
-    await socket.on("data", async function (chunk: any) {
-        //receiving logic
-        if(!initialized){
-            initialized = true
-            leftover = await data_handler(chunk, leftover, socket, false)
-        } else {
-            leftover = await data_handler(chunk, leftover, socket, initialized)
-        }
+    socket.on("data", function (chunk: any) {
+        data_handler(chunk, leftover, socket, initialized)
     });
 
     socket.on("end", function (chunk: any) {

@@ -5,11 +5,11 @@ import { validate_tx_object } from "./transaction";
 import { hash_string } from "./helpers";
 import { validate_block } from "./block";
 
-export async function receive_object(object:string, socket:any){
+export function receive_object(object:string, socket:any){
     console.log(
         `Receivejson.d object message from ${socket.remoteAddress}:${socket.remotePort}`
     );
-    await has_object(hash_string(object)).then(async (result) => {
+    has_object(hash_string(object)).then(async (result) => {
         if (!<any>result){
 
             var save = false;
@@ -38,17 +38,18 @@ export function send_object(objid:any, socket: any) {
     console.log(
         `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
     );
-    has_object(objid).then((val) => {
-        if (<any>val){
-            get_object(objid).then((result) => {
-                    socket.write(send_format({
-                        type: "object",
-                        object: JSON.parse(result)
-                    }))
-            });
-        }
-    });
-    
+    setTimeout(function(){
+        has_object(objid).then((val) => {
+            if (<any>val){
+                get_object(objid).then((result) => {
+                        socket.write(send_format({
+                            type: "object",
+                            object: JSON.parse(result)
+                        }))
+                });
+            }
+        });
+    }, 500);    
 }
 
 export function send_getobject(objid: any, socket: any) {
