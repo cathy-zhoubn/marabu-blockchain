@@ -115,24 +115,24 @@ async function validate_tx_input(object:any, input:any, socket:any){
 }
 
 async function validate_signature(input:any, no_sig:any, key:string, socket:any){
-    if (!is_hex(input.sig, socket)){
-        socket_error(input, socket, "Signature does not have a valid format");
-        return false;
-    }
-    let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
-    let mes = nacl.util.decodeUTF8(canonicalize(no_sig));
-    let isValid = false;
-    try {
-        isValid = await ed.verify(sig, mes, key);
-    } catch (error) {
-        socket_error(input, socket, "Signature is not valid");
-        return false;
-    }
+    // if (!is_hex(input.sig, socket)){
+    //     socket_error(input, socket, "Signature does not have a valid format");
+    //     return false;
+    // }
+    // let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
+    // let mes = nacl.util.decodeUTF8(canonicalize(no_sig));
+    // let isValid = false;
+    // try {
+    //     isValid = await ed.verify(sig, mes, key);
+    // } catch (error) {
+    //     socket_error(input, socket, "Signature is not valid");
+    //     return false;
+    // }
     
-    if (!isValid){
-        socket_error(input, socket, "Some transaction input does not have a valid signature");
-        return false;
-    }
+    // if (!isValid){
+    //     socket_error(input, socket, "Some transaction input does not have a valid signature");
+    //     return false;
+    // }
     return true;
 }
 

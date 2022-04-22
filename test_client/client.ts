@@ -188,12 +188,12 @@ function test3_block(){
         "height": 1,
         "outputs": [{
             "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-            "value": 50000000000
+            "value": 500000000000000000000000000000000000
         }],
         "type": "transaction"
     }
     
-    let block1_fake_id = "bda1e0dd9fe240c29b641797b759db8e6da1f406ee7409b24ffde685533eb168"
+    let block1_fake_id = "64b96bc22b1c7692ce8f176200f0f8bae14a1693ce6ae53f0597c384d30533d3"
 
     let fake_noncb_tx = { "type": "transaction", "inputs": [ { "outpoint": { "txid": "f71408bf847d7dd15824574a7cd4afdfaaa2866286910675cd3fc371507aa196", "index": 0 }, "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 5100000000 } ] }
     
@@ -205,12 +205,24 @@ function test3_block(){
         "note": "First block. Yayy, I have 50 bu now!!",
         "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
         "txids": [
-        "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", block1_fake_id
+            "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", 
+            "fe4bfc1abba7ef4c3f32f261a4b6f948ce4388be6ef7deed62f9186b896e9e29"
         ],
         "type": "block"
     }
+
+    let trans_2 = { 
+        "type": "transaction", 
+        "inputs": [ { 
+            "outpoint": { 
+                "txid": "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", 
+                "index": 0 
+            }, 
+            "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], 
+            "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 51000 } ] }
     client.write(canonicalize(genesis) + "\n");
     client.write(canonicalize({"object": block1_transaction, "type":"object"}) + "\n");
-    client.write(canonicalize({"object": block1_fake_transaction, "type":"object"}) + "\n");
+    // client.write(canonicalize({"object": block1_fake_transaction, "type":"object"}) + "\n");
+    client.write(canonicalize({"object": trans_2, "type":"object"}) + "\n");
     client.write(canonicalize({"object": fake_block_1, "type":"object"}) + "\n");
 }
