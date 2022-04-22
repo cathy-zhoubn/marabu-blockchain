@@ -5,6 +5,7 @@ import {hash_string, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
+import { validate_UTXO } from "./utxo";
 
 
 const coinbase_reward = 50e12;
@@ -18,10 +19,10 @@ export async function receive_block(data: any, socket: any) {
 
 export async function validate_block(data:any, socket:any){
     let blockid = hash_string(canonicalize(data));
-    if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
-        socket_error(data, socket, "Block does not have valid target.");
-        return false;
-    }
+    // if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
+    //     socket_error(data, socket, "Block does not have valid target.");
+    //     return false;
+    // }
     // Check proof of work
     if (!valid_pow(data, blockid, socket)) return false;
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
@@ -58,10 +59,11 @@ export async function validate_block(data:any, socket:any){
     // validate all txids
     if (!await validate_txids(data, socket)) return false;
     else {
-        // if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
-        //     socket_error(data, socket, "Block does not have valid UTXO.");
-        //     return false;
-        // }
+        console.log(data);
+        if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
+            socket_error(data, socket, "Block does not have valid UTXO.");
+            return false;
+        }
     }
 
     console.log("completed")
@@ -138,3 +140,18 @@ function validate_genesis(data: any, socket: any) {
     // TODO: validation needed?
     return true;
 }
+
+
+
+let block1_fake_transaction = {
+    "height": 1,
+    "outputs": [{
+        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
+        "value": 50000000000
+    }],
+    "type": "transaction"
+}
+
+// let x = validate_block(JSON.parse(), null);
+console.log(hash_string(canonicalize(block1_fake_transaction)));
+// console.log(x);
