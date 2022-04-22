@@ -64,11 +64,22 @@ export async function add_object(objectid: string, object: string){
 
 export async function save_to_UTXO_table(blockid: string, utxo_set: Set<any>){
   utxo_set.forEach(async (outpoint) => {
-    const text = ` INSERT INTO utxo (blockid, txid, index) VALUES($1, $2, $3);`;
-    const values = [blockid, outpoint.txid, outpoint.index];
-    await pool.query(text, values);
+    if(!await has_UTXO_lable(blockid, outpoint.txid, outpoint.index)){
+      const text = ` INSERT INTO utxo (blockid, txid, index) VALUES($1, $2, $3);`;
+      const values = [blockid, outpoint.txid, outpoint.index];
+      await pool.query(text, values);
+    }
   });
 }
+
+export async function has_UTXO_lable(blockid: string, txid: string, index: number){
+  const text = `SELECT COUNT(*) FROM utxo WHERE blockid=$1 AND txid=$2 AND index=$3;`;
+  const values = [blockid, txid, index];
+  const result = await pool.query(text, values);
+  const count : number = +result.rows[0]["count"];
+  return count > 0
+}
+
 
 export async function get_UTXO_table(blockid: string) { //return a set
   const text = `SELECT * FROM utxo WHERE blockid=$1;`;
@@ -81,5 +92,15 @@ export async function get_UTXO_table(blockid: string) { //return a set
   return set;
 }
 
+const set = new Set()
+// set.add({"txid": "1", "index": 1})
+// set.add({"txid": "2", "index": 2})
+// save_to_UTXO_table("1", set)
 
-let genesis = { "T": "00000002af000000000000000000000000000000000000000000000000000000", "created": 1624219079, "miner": "dionyziz", "nonce": "0000000000000000000000000000000000000000000000000000002634878840", "note": "The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage", "previd": null, "txids": [], "type": "block" }
+// has_UTXO_lable("1", "1", 1).then((set) => {
+//   console.log(set)
+// })
+
+// get_UTXO_table("1").then((set) => {
+//   console.log(set)
+// })

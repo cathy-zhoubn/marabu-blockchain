@@ -9,7 +9,7 @@ object_id TEXT PRIMARY KEY,
 object TEXT UNIQUE NOT NULL);
 
 create table utxo (
-blockid TEXT PRIMARY KEY,
+blockid TEXT NOT NULL,
 txid TEXT NOT NULL,
 index INT NOT NULL);
 

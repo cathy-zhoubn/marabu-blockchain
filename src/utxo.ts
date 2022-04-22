@@ -11,7 +11,6 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 	//remove each input
 	//add each output's index to UTXO
 	const utxo = await get_UTXO_table(previd)
-	const added_utxo = new Set()
 
 	for(let txid of txids){
 		let tx_string = await get_object(txid)
@@ -33,13 +32,11 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 		}
 
 		for(let i=0; i<tx.outputs.length; i++){
-			added_utxo.add({"txid": txid, "index": i})
+			utxo.add({"txid": txid, "index": i})
 		}
 	}
 
-	added_utxo.forEach((i) => {
-		utxo.add(i)
-	})
+
 	save_to_UTXO_table(currentid, utxo)
 
 	return true;
