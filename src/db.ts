@@ -75,21 +75,11 @@ export async function get_UTXO_table(blockid: string) { //return a set
   const values = [blockid];
   const result = await pool.query(text, values);
   const set = new Set()
-  try{
-    for (let row of result.rows){
-      set.add({"txid": row["txid"], "index": row["index"]})
-    }
-    return set;
-  } catch(e) {
-    return 0
+  for (let row of result.rows){
+    set.add({"txid": row["txid"], "index": row["index"]})
   }
+  return set;
 }
 
-// const set = new Set()
-// set.add({"txid": 1, "index": 1})
-// set.add({"txid": 2, "index": 2})
-// save_to_UTXO_table("1", set)
 
-// get_UTXO_table("1").then((set) => {
-//   console.log(set)
-// })
+let genesis = { "T": "00000002af000000000000000000000000000000000000000000000000000000", "created": 1624219079, "miner": "dionyziz", "nonce": "0000000000000000000000000000000000000000000000000000002634878840", "note": "The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage", "previd": null, "txids": [], "type": "block" }

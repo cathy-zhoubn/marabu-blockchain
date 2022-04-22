@@ -4,19 +4,13 @@ import { socket_error} from "./socket";
 
 
 export async function validate_UTXO(previd: string, currentid: string, txids: [string], socket: any){
-
 	//get the previous UTXO set
 	//for each of current tx's
 	//get the transaction object
 	//validate each input outpoints in UTXO
 	//remove each input
 	//add each output's index to UTXO
-	const utxo = await get_UTXO_table(previd)	
-	if(utxo == 0){
-		socket_error(previd, socket, "cannot find a utxo set associated with the previous blockid");
-		return false
-	}
-
+	const utxo = await get_UTXO_table(previd)
 	const added_utxo = new Set()
 
 	for(let txid of txids){
