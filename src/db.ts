@@ -1,6 +1,8 @@
 const { Pool } = require("pg");
 import config from './config.json';
 const db_config = config.database;
+import { canonicalize } from 'json-canonicalize';
+
 
 const ip_re = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
@@ -63,7 +65,8 @@ export async function add_object(objectid: string, object: string){
 }
 
 export async function save_to_UTXO_table(blockid: string, utxo_set: Set<any>){
-  utxo_set.forEach(async (outpoint) => {
+  utxo_set.forEach(async (outpoint_str) => {
+    let outpoint = JSON.parse(outpoint_str)
     if(!await has_UTXO_lable(blockid, outpoint.txid, outpoint.index)){
       const text = ` INSERT INTO utxo (blockid, txid, index) VALUES($1, $2, $3);`;
       const values = [blockid, outpoint.txid, outpoint.index];
@@ -87,7 +90,7 @@ export async function get_UTXO_table(blockid: string) { //return a set
   const result = await pool.query(text, values);
   const set = new Set()
   for (let row of result.rows){
-    set.add({"txid": row["txid"], "index": row["index"]})
+    set.add(canonicalize({"txid": row["txid"], "index": row["index"]}))
   }
   return set;
 }

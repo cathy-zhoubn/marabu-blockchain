@@ -1,6 +1,7 @@
-import { has_object, get_object, get_UTXO_table, save_to_UTXO_table } from "./db"
-import { validate_tx_object } from "./transaction"
+import { get_object, get_UTXO_table, save_to_UTXO_table } from "./db"
 import { socket_error} from "./socket";
+import { canonicalize } from 'json-canonicalize';
+
 
 
 export async function validate_UTXO(previd: string, currentid: string, txids: [string], socket: any){
@@ -22,7 +23,7 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 
 		if (tx.hasOwnProperty("inputs")){
 			for(let input of tx.inputs){
-				let outpoint = input.outpoint
+				let outpoint = canonicalize(input.outpoint)
 				if(!utxo.has(outpoint)){
 					socket_error(txid, socket, "previous UTXO does not contain a transaction input");
 					return false
@@ -32,7 +33,7 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 		}
 
 		for(let i=0; i<tx.outputs.length; i++){
-			utxo.add({"txid": txid, "index": i})
+			utxo.add(canonicalize({"txid": txid, "index": i}))
 		}
 	}
 
