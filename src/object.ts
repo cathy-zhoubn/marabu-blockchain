@@ -7,7 +7,7 @@ import { validate_block } from "./block";
 
 export async function receive_object(object:string, socket:any){
     console.log(
-        `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
+        `Receivejson.d object message from ${socket.remoteAddress}:${socket.remotePort}`
     );
     await has_object(hash_string(object)).then(async (result) => {
         if (!<any>result){

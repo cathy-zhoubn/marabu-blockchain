@@ -2,6 +2,7 @@ import { send_format, socket_error} from "./socket";
 import { has_object, get_object } from "./db";
 import { is_hex } from "./helpers";
 import * as ed from '@noble/ed25519';
+import { canonicalize } from "json-canonicalize";
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
@@ -102,7 +103,7 @@ async function validate_tx_input(object:any, input:any, socket:any){
 
     //check if outpoint txid exists
     let [key, val] = await get_key_val(input.outpoint.txid, input.outpoint.index, socket);
-    let no_sig = JSON.parse(JSON.stringify(object))
+    let no_sig = JSON.parse(canonicalize(object))
     for (let i = 0; i < no_sig.inputs.length; i++){
         no_sig.inputs[i].sig = null;
     }
@@ -119,7 +120,7 @@ async function validate_signature(input:any, no_sig:any, key:string, socket:any)
         return false;
     }
     let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
-    let mes = nacl.util.decodeUTF8(JSON.stringify(no_sig));
+    let mes = nacl.util.decodeUTF8(canonicalize(no_sig));
     let isValid = false;
     try {
         isValid = await ed.verify(sig, mes, key);

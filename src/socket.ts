@@ -2,6 +2,7 @@ import { send_object, send_getobject, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers';
 import {receive_block} from './block';
 import { send } from 'process';
+import { canonicalize } from 'json-canonicalize';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -14,7 +15,7 @@ export function broadcast(all_sockets:Set<any>, data: any){ //TODO: conditions t
 }
 
 export function send_format(dict: any): string {
-    return JSON.stringify(dict) + "\n";
+    return canonicalize(dict) + "\n";
 }
 
 export async function data_handler(
@@ -74,7 +75,7 @@ export async function process_data(data:any, socket:any){
     } else if (data.type == "getobject") {
         send_object(data.objectid, socket);
     } else if (data.type == "object") {
-        await receive_object(await JSON.stringify(data.object), socket);
+        await receive_object(await canonicalize(data.object), socket);
     } else if (data.type == "ihaveobject") {
         let objid = data.objectid;
         console.log(

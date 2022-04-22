@@ -1,20 +1,10 @@
 import hash, { blockSize } from "fast-sha256";
 import { broadcast, all_sockets, socket_error } from "./socket";
+import { canonicalize, canonicalizeEx } from 'json-canonicalize';
 import {hash_string, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
-
-let bl = { 
-    "type": "block", 
-    "txids": [ "740bcfb434c89abe57bb2bc80290cd5495e87ebf8cd0dadb076bc50453590104" ], 
-    "nonce": "a26d92800cf58e88a5ecf37156c031a4147c2128beeaf1cca2785c93242a4c8b", 
-    "previd": "0024839ec9632d382486ba7aac7e0bda3b4bda1d4bd79be9ae78e7e1e813ddd8", 
-    "created": 1622825642, 
-    "T": "003a000000000000000000000000000000000000000000000000000000000000", 
-    "miner": "dionyziz", 
-    "note": "A sample block" 
-}
 
 
 const coinbase_reward = 50e12;
@@ -27,13 +17,13 @@ export async function receive_block(data: any, socket: any) {
 }
 
 export async function validate_block(data:any, socket:any){
-    let blockid = hash_string(JSON.stringify(data));
+    let blockid = hash_string(canonicalize(data));
     if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
         socket_error(data, socket, "Block does not have valid target.");
         return false;
     }
     // Check proof of work
-    // if (!valid_pow(data, blockid, socket)) return false;
+    if (!valid_pow(data, blockid, socket)) return false;
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
@@ -148,11 +138,3 @@ function validate_genesis(data: any, socket: any) {
     // TODO: validation needed?
     return true;
 }
-
-
-
-
-
-// let x = validate_block(JSON.parse(), null);
-// console.log(hash_string(JSON.stringify(block1)));
-// console.log(x);

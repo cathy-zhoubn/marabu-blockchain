@@ -1,4 +1,4 @@
-
+import { canonicalize, canonicalizeEx } from 'json-canonicalize';
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 import sha256 from "fast-sha256";
@@ -68,13 +68,13 @@ function test1() {
     // client.write(JSON.stringify({"type":"hello","version":"5.8.2"}) + "\n");
 }
 
-let ob = {
-    "type": "block", 
+let ob = { 
     "txids": [ "740bcfb434c89abe57bb2bc80290cd5495e87ebf8cd0dadb076bc50453590104" ], 
     "nonce": "a26d92800cf58e88a5ecf37156c031a4147c2128beeaf1cca2785c93242a4c8b", 
     "previd": "0024839ec9632d382486ba7aac7e0bda3b4bda1d4bd79be9ae78e7e1e813ddd8", 
     "created": "1622825642", 
-    "T": "003a000000000000000000000000000000000000000000000000000000000000" 
+    "T": "003a000000000000000000000000000000000000000000000000000000000000",
+    "type": "block"
 };
 
 var objstr = JSON.stringify(ob);
@@ -175,16 +175,17 @@ let block1 = {
 }
 
 let block1_transaction = {
-    "type": "transaction",
     "height": 0,
     "outputs": [{
         "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
         "value": 50000000000
-    }]
+    }],
+    "type": "transaction"
 }
 
+
 function test3_block(){
-    client.write(JSON.stringify({"object": genesis, "type":"object"}) + "\n");
-    client.write(JSON.stringify({"object": block1_transaction, "type":"object"}) + "\n");
-    client.write(JSON.stringify({"object": block1, "type":"object"}) + "\n");
+    client.write(canonicalize(genesis) + "\n");
+    client.write(canonicalize({"object": block1_transaction, "type":"object"}) + "\n");
+    client.write(canonicalize({"object": block1, "type":"object"}) + "\n");
 }
