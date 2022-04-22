@@ -170,14 +170,12 @@ function test3_block(){
     // client.write(canonicalize(genesis) + "\n");
     // client.write(canonicalize({"objectid":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","type":"getobject"}) + "\n");
 
-    // TODO
     // let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650421857102,"miner":"grader","nonce":"d20e849d2e19dc7408b0c02d4dba5a1b3895839a4242660ae8ee18a5a97bcae7","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["2aac601bb784c0de6fdbf47918c9928fb0505eda3174d5cc7790f9b7d27e1963"],"type":"block"},"type":"object"}
     // client.write(JSON.stringify(block1) + "\n");
     // let trans1 = {"object":{"height":1,"outputs":[{"pubkey":"6756c64a8f9cdce26a0c390134a780bedaa04dd74722047f3da6600f141e86d3","value":50000000000000}],"type":"transaction"},"type":"object"}
     // client.write(JSON.stringify(trans1) + "\n");
     // client.write(JSON.stringify({"objectid":"00000002364806bfeafd0af08e88805ce14ea2e0222e0d3aaee3fe1809047482","type":"getobject"}) + "\n");
 
-    // TODO
     // let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650433203255,"miner":"grader","nonce":"eab983d7bf941a212915b2155375e5ae308e23fe346155f8c8cb552c4ac98e51","note":"This block has another coinbase and spends earlier coinbase","previd":"00000002364806bfeafd0af08e88805ce14ea2e0222e0d3aaee3fe1809047482","txids":["1db7b7b6a0971aac14cc3a5114864c89c0455c2baebf3050760c30a24964cf7c","314e63a79f51450750282a02bc669d799781b222379930be635d7f2429c0fb36"],"type":"block"},"type":"object"}
     // client.write(JSON.stringify(block3) + "\n");
     // let trans3 = {"object":{"height":2,"outputs":[{"pubkey":"25ecf98703df4843d1dac2754776044cbec63082bf563bf23ccb2a2adf8d93e6","value":51000000000000}],"type":"transaction"},"type":"object"}
@@ -189,8 +187,46 @@ function test3_block(){
     // let block4 = {"object":{"T":"f000000000000000000000000000000000000000000000000000000000000000","created":0,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000000000000","note":"Block with incorrect target","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":[] as any,"type":"block"},"type":"object"}
     // client.write(JSON.stringify(block4) + "\n");
 
-    let block5 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":0,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000000000000","note":"Block with invalid PoW","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":[] as any,"type":"block"},"type":"object"}
-    client.write(JSON.stringify(block5) + "\n");
+    // let block5 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":0,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000000000000","note":"Block with invalid PoW","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":[] as any,"type":"block"},"type":"object"}
+    // client.write(JSON.stringify(block5) + "\n");
+
+    // let tx60 = {"object":{"height":0,"outputs":[{"pubkey":"2f4737da7c94f08b826ff7b90928809c827b58cfb6a9e3ebfedb641f9bdb1bd8","value":50000000000000}],"type":"transaction"},"type":"object"}
+    // let block61={"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650360325883,"miner":"grader","nonce":"b55afc8030628c46e7dff949daeee10a492b9c54ad3835967f82bff5f01bc565","note":"First block ","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019"],"type":"block"},"type":"object"}
+    // let tx61= {"object":{"height":0,"outputs":[{"pubkey":"2f4737da7c94f08b826ff7b90928809c827b58cfb6a9e3ebfedb641f9bdb1bd8","value":50000000000000}],"type":"transaction"},"type":"object"}
+    // let tx62 = {"object":{"height":1,"outputs":[{"pubkey":"2f4737da7c94f08b826ff7b90928809c827b58cfb6a9e3ebfedb641f9bdb1bd8","value":80000000000000}],"type":"transaction"},"type":"object"}
+    // let tx63 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019"},"sig":"48b558198f958de15c3e486c35a78dc76196a3f5bab3d3951035128e30fa31dceaa6372e1b6a3052d9ad1a3c0c4be761617d3b3d58502de7564621665d821a0e"}],"outputs":[{"pubkey":"2f4737da7c94f08b826ff7b90928809c827b58cfb6a9e3ebfedb641f9bdb1bd8","value":40000000000000}],"type":"transaction"},"type":"object"}
+    // let block62={"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650374139735,"miner":"grader","nonce":"0a617bf859c8d439c6c67e2758b28a16d2ef013b0594c877fa7a03573d49517a","note":"Law of conservation is violated","previd":"000000016bcb1ff93e5926c9f39e9709ddc537813580d426c332180357bb2faf","txids":["a80b8eeceb87ef7f748bea64653e7f2e95e98915795ad96a8001500b99dd4034","c1a4da505aee98180c3aca1495a3f06840b99ac644311d3998f41c5699c96900"],"type":"block"},"type":"object"}
+    // client.write(JSON.stringify(block61) + "\n");
+    // client.write(JSON.stringify(tx60) + "\n");
+    // client.write(JSON.stringify(block62) + "\n");
+    // client.write(JSON.stringify(tx61) + "\n");
+    // client.write(JSON.stringify(tx62) + "\n");
+    // client.write(JSON.stringify(tx63) + "\n");
+
+    // let block7 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650348668065,"miner":"grader","nonce":"0f7f45ae349d078a53ff585d5a799948e08667acf63c8d6188e8d1a7abaa0e55","note":"Invalid transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019","ff534ea7bc01239d7b5b5118fefee2e981147745237e9e75f64b8d563979927b"],"type":"block"},"type":"object"}
+    // client.write(JSON.stringify(block7) + "\n");
+
+    // let block8 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650421590750,"miner":"grader","nonce":"104069820c2eab27b8ffe14fb9cb52ed97ee1257acd7971f3b4be864622a4586","note":"Two coinbase transactions","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019","6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019"],"type":"block"},"type":"object"}
+    // client.write(JSON.stringify(block8) + "\n");
+
+    let block91 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650429488757,"miner":"grader","nonce":"b03e884410b399d5e741a406a563247987f6b481ccfaf888cf1da1bc8652f13d","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"],"type":"block"},"type":"object"}
+    let tx91 = {"object":{"height":1,"outputs":[{"pubkey":"62b7c521cd9211579cf70fd4099315643767b96711febaa5c76dc3daf27c281c","value":50000000000000}],"type":"transaction"},"type":"object"}
+    let block92 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650443872692,"miner":"grader","nonce":"3bb79b0f01194f3fc93c1ad5ae581255290928382d43c310de23061187cfb3b9","note":"This block spends coinbase transaction twice","previd":"000000001b4a28cba15006342f40004aba3038c9d04489ffd0f6454eed80fad1","txids":["d33ac384ea704025a6cac53f669c8e924eff7205b0cd0d6a231f0881b6265a8e","b00a4ef2e9a9985700d9b31f84e18b56fdcd7d824e450b276031e53d20a441fe"],"type":"block"},"type":"object"}
+    let tx92 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"d51e82d5c121c5db21c83404aaa3f591f2099bccf731208c4b0b676308be1f994882f9d991c0ebfd8fdecc90a4aec6165fc3440ade9c83b043cba95b2bba1d0a"}],"outputs":[{"pubkey":"228ee807767047682e9a556ad1ed78dff8d7edf4bc2a5f4fa02e4634cfcad7e0","value":49000000000000}],"type":"transaction"},"type":"object"}
+    let tx93 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"5719653765e9a541ba9e6e1173ed05023091294190fc4f21ebc997935d09baf66b6b051368473480d84fb644671aca63e2ad0999c57266098e959b092ea06a0b"}],"outputs":[{"pubkey":"59fe88f36b19b95267f18cf6ad5879afa9fca3b9fec3953d93d3efade5abe294","value":48000000000000}],"type":"transaction"},"type":"object"}
+    client.write(JSON.stringify(block91) + "\n");
+    client.write(JSON.stringify(tx91) + "\n");
+    client.write(JSON.stringify(block92) + "\n");
+    client.write(JSON.stringify(tx92) + "\n");
+    client.write(JSON.stringify(tx93) + "\n");
+    
+    let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
+    let block102 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650416900867,"miner":"grader","nonce":"f17f634c8662a18c7f74b36ebbdded2210e66eb07b9c7b47e38e5ab47be7aa88","note":"This block spends a coinbase transaction not in its prev blocks","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["869676c06de441f83e7437db7ad0804bb5b2342f12dd9bbd12ee562d1486f7aa"],"type":"block"},"type":"object"}
+    let tx102 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"535c47f49925a6a64f9fa98f012db3b8d6afebad2029cfa3341abe16abda5d29"},"sig":"774c44c33ffe5727fd9d45a2bfb13415b395eca2ec9fc6e9ea896315a3c0fb4f49f77c497a3a1f7cf7e93b4c844c1aa9e7cd428c077e396f9458850f7dc89e02"}],"outputs":[{"pubkey":"be49ae0682fc38da5c981a36a405a4031ff1b5d3acb541d80e9c8e645b77b340","value":49000000000000}],"type":"transaction"},"type":"object"}
+    client.write(JSON.stringify(tx101) + "\n");
+    client.write(JSON.stringify(block102) + "\n");
+    client.write(JSON.stringify(tx102) + "\n");
+
 
     // client.write(canonicalize({"object": block1_transaction, "type":"object"}) + "\n");
     // // client.write(canonicalize({"object": block1_fake_transaction, "type":"object"}) + "\n");

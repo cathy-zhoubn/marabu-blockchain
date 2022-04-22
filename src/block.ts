@@ -60,7 +60,6 @@ export async function validate_block(data:any, socket:any){
     if (!await validate_txids(data, socket)) return false;
     else {
         if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
-            socket_error(data, socket, "Block does not have valid UTXO.");
             return false;
         }
     }
@@ -97,7 +96,9 @@ async function validate_txids(block:any, socket:any) {
     for (let i=0; i<block.txids.length; i++){
         let txid = block.txids[i];
         let tx = JSON.parse(await get_object(txid));
+        console.log("executing " + i)
         if ((!tx.hasOwnProperty("inputs")) && (tx.hasOwnProperty("height"))){
+            console.log("entered")
             // if coinbase is not the first
             if (i != 0){
                 socket_error(block, socket, "Coinbase transaction is not the first transaction in the block.");
@@ -122,11 +123,11 @@ async function validate_coinbase_conservation(block: any, coinbase_tx:any, socke
             for (let input of tx.inputs){
                 let prev_tx = JSON.parse(await get_object(input.outpoint.txid));
                 let prev_output = prev_tx.outputs[input.outpoint.index];
-                max -= prev_output.value;
+                max += prev_output.value;
             }
-        }
-        for (let output of tx.outputs){
-            max += output.value;
+            for (let output of tx.outputs){
+                max -= output.value;
+            }
         }
     }
     if (coinbase_tx.outputs[0].value > max){
@@ -143,33 +144,9 @@ function validate_genesis(data: any, socket: any) {
 
 
 
-let block1_fake_transaction = {
-    "height": 1,
-    "outputs": [{
-        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-        "value": 500000000000000000000000000000000000
-    }],
-    "type": "transaction"
-}
+let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
+      
 
-let block1_transaction = {
-    "height": 0,
-    "outputs": [{
-        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-        "value": 50000000000
-    }],
-    "type": "transaction"
-}
-
-let trans_2 = { 
-    "type": "transaction", 
-    "inputs": [ { 
-        "outpoint": { 
-            "txid": "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", 
-            "index": 0 
-        }, 
-        "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], 
-        "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 510000000000000 }]}
-// let x = validate_block(JSON.parse(), null);
-console.log(hash_string(canonicalize(trans_2)));
+        // let x = validate_block(JSON.parse(), null);
+console.log(hash_string(canonicalize(tx101.object)));
 // console.log(x);
