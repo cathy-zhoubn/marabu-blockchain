@@ -8,6 +8,11 @@ create table objects (
 object_id TEXT PRIMARY KEY,
 object TEXT UNIQUE NOT NULL);
 
+create table utxo (
+blockid TEXT PRIMARY KEY,
+txid TEXT NOT NULL,
+index TEXT NOT NULL);
+
 step 2: add `config.json` file in the src directory. The file should contain the following 
 `
 {

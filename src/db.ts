@@ -35,7 +35,12 @@ export async function get_object(objectid: string){
   const text = `SELECT * FROM objects WHERE object_id=$1;`;
   const values = [objectid];
   const result = await pool.query(text, values);
-  return result.rows[0]["object"]
+  try{
+    return result.rows[0]["object"]
+  } catch(e) {
+    console.log("Failed to get object")
+    return 0;
+  }
 }
 
 export async function has_object(objectid: string){
@@ -56,3 +61,35 @@ export async function add_object(objectid: string, object: string){
     return 0;
   }
 }
+
+export async function save_to_UTXO_table(blockid: string, utxo_set: Set<any>){
+  utxo_set.forEach(async (outpoint) => {
+    const text = ` INSERT INTO utxo (blockid, txid, index) VALUES($1, $2, $3);`;
+    const values = [blockid, outpoint.txid, outpoint.index];
+    await pool.query(text, values);
+  });
+}
+
+export async function get_UTXO_table(blockid: string) { //return a set
+  const text = `SELECT * FROM utxo WHERE blockid=$1;`;
+  const values = [blockid];
+  const result = await pool.query(text, values);
+  const set = new Set()
+  try{
+    for (let row of result.rows){
+      set.add({"txid": row["txid"], "index": row["index"]})
+    }
+    return set;
+  } catch(e) {
+    return 0
+  }
+}
+
+// const set = new Set()
+// set.add({"txid": 1, "index": 1})
+// set.add({"txid": 2, "index": 2})
+// save_to_UTXO_table("1", set)
+
+// get_UTXO_table("1").then((set) => {
+//   console.log(set)
+// })
