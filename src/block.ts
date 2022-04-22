@@ -64,7 +64,6 @@ export async function validate_block(data:any, socket:any){
         }
     }
 
-    console.log("completed") //TODO : delete
     return true;
 
 }
@@ -84,7 +83,6 @@ async function validate_txids(block:any, socket:any) {
     for (let txid of block.txids){
         await send_getobject(txid, socket);
     }
-    //TODO add waiting
     // confirm all txids are in the database
     for (let txid of block.txids){
         if (!await has_object(txid)){
