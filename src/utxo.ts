@@ -27,13 +27,15 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 		}
 		let tx = JSON.parse(tx_string)
 
-		for(let input of tx.inputs){
-			let outpoint = input.outpoint
-			if(!utxo.has(outpoint)){
-				socket_error(txid, socket, "previous UTXO does not contain a transaction input");
-				return false
+		if (tx.hasOwnProperty("inputs")){
+			for(let input of tx.inputs){
+				let outpoint = input.outpoint
+				if(!utxo.has(outpoint)){
+					socket_error(txid, socket, "previous UTXO does not contain a transaction input");
+					return false
+				}
+				utxo.delete(outpoint)
 			}
-			utxo.delete(outpoint)
 		}
 
 		for(let i=0; i<tx.outputs.length; i++){

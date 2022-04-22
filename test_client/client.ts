@@ -150,42 +150,65 @@ function hash_object(object: string) {
     return Buffer.from(hashed).toString('hex');;
 }
 
-let genesis = { 
-    "T": "00000002af000000000000000000000000000000000000000000000000000000", 
-    "created": 1624219079, 
-    "miner": "dionyziz", 
-    "nonce": "0000000000000000000000000000000000000000000000000000002634878840", 
-    "note": "The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage", 
-    "previd": null as any, 
-    "txids": [] as any, 
-    "type": "block"
-}
-
-let block1 = {
-    "nonce": "c5ee71be4ca85b160d352923a84f86f44b7fc4fe60002214bc1236ceedc5c615",
-    "T": "00000002af000000000000000000000000000000000000000000000000000000",
-    "created": 1649827795114,
-    "miner": "svatsan",
-    "note": "First block. Yayy, I have 50 bu now!!",
-    "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
-    "txids": [
-    "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
-    ],
-    "type": "block"
-}
-
-let block1_transaction = {
-    "height": 0,
-    "outputs": [{
-        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-        "value": 50000000000
-    }],
-    "type": "transaction"
-}
-
-
 function test3_block(){
+    let genesis = { 
+        "T": "00000002af000000000000000000000000000000000000000000000000000000", 
+        "created": 1624219079, 
+        "miner": "dionyziz", 
+        "nonce": "0000000000000000000000000000000000000000000000000000002634878840", 
+        "note": "The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage", 
+        "previd": null as any, 
+        "txids": [] as any, 
+        "type": "block"
+    }
+    
+    let block1 = {
+        "nonce": "c5ee71be4ca85b160d352923a84f86f44b7fc4fe60002214bc1236ceedc5c615",
+        "T": "00000002af000000000000000000000000000000000000000000000000000000",
+        "created": 1649827795114,
+        "miner": "svatsan",
+        "note": "First block. Yayy, I have 50 bu now!!",
+        "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
+        "txids": [
+        "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
+        ],
+        "type": "block"
+    }
+    
+    let block1_transaction = {
+        "height": 0,
+        "outputs": [{
+            "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
+            "value": 50000000000
+        }],
+        "type": "transaction"
+    }
+    
+    let block1_fake_transaction = {
+        "height": 1,
+        "outputs": [{
+            "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
+            "value": 50000000000
+        }],
+        "type": "transaction"
+    }
+    
+    let block1_fake_id = "bda1e0dd9fe240c29b641797b759db8e6da1f406ee7409b24ffde685533eb168"
+    
+    let fake_block_1 = {
+        "nonce": "c5ee71be4ca85b160d352923a84f86f44b7fc4fe60002214bc1236ceedc5c615",
+        "T": "ee000002af000000000000000000000000000000000000000000000000000000",
+        "created": 1649827795114,
+        "miner": "svatsan",
+        "note": "First block. Yayy, I have 50 bu now!!",
+        "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
+        "txids": [
+        "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", block1_fake_id
+        ],
+        "type": "block"
+    }
     client.write(canonicalize(genesis) + "\n");
     client.write(canonicalize({"object": block1_transaction, "type":"object"}) + "\n");
-    client.write(canonicalize({"object": block1, "type":"object"}) + "\n");
+    client.write(canonicalize({"object": block1_fake_transaction, "type":"object"}) + "\n");
+    client.write(canonicalize({"object": fake_block_1, "type":"object"}) + "\n");
 }
