@@ -1,5 +1,6 @@
 import { send_format, socket_error} from "./socket";
 import { has_object, get_object } from "./db";
+import { is_hex } from "./helpers";
 import * as ed from '@noble/ed25519';
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
@@ -22,7 +23,7 @@ export async function validate_tx_object(tx:any, socket:any) {
         }
     }
 
-    if (tx.hasOwnProperty("height")){
+    if (!tx.hasOwnProperty("inputs") && tx.hasOwnProperty("height")){
         return validate_coinbase(tx, socket);
     } 
 
@@ -40,8 +41,30 @@ export async function validate_tx_object(tx:any, socket:any) {
 
 
 
-export function validate_coinbase(object: any, socket:any) {
-    //TODO: implement in next assignments
+export function validate_coinbase(tx: any, socket:any) {
+    //check if coinbase has correct format
+    if (!tx.hasOwnProperty("height") || !(typeof tx.height == "number") || tx.height < 0){
+        socket_error(tx, socket, "Coinbase does not have a valid height");
+        return false;
+    }
+    if (!tx.hasOwnProperty("outputs")){
+        socket_error(tx, socket, "Coinbase does not have any outputs");
+        return false;
+    }
+    // check if output is correct
+    if (tx.outputs.length != 1){
+        socket_error(tx, socket, "Coinbase has more than one output");
+        return false;
+    }
+    let out = tx.outputs[0];
+    if (!out.hasOwnProperty("value") || !(typeof out.value == "number") || out.value < 0){
+        socket_error(tx, socket, "Coinbase output does not have a valid value");
+        return false;
+    }
+    if (!out.hasOwnProperty("pubkey") || !validate_key(out.pubkey, socket)){
+        socket_error(tx, socket, "Coinbase output does not have a valid pubkey");
+        return false;
+    }
     return true;
 }
 
@@ -147,23 +170,10 @@ function validate_tx_output(outputs: [any], socket:any) : number{
 }
 
 function validate_key(key:string, socket:any){
-    if (!is_hex(key, socket || key.length != 64)){
+    if (!is_hex(key, socket) || key.length != 64){
         socket_error(key, socket, "Key does not have a valid format");
         return false;
     }
     return true;
 }
 
-function is_hex(key:string, socket:any){
-    if (!(typeof key == "string")){
-        socket_error(key, socket, "Key does not have a valid format");
-        return false;
-    }
-    for (let letter of key){
-        if (!(letter >= '0' && letter <= '9') && !(letter >= 'a' && letter <= 'f')){
-            socket_error(key, socket, "Key does not have a valid format");
-            return false;
-        }
-    }
-    return true;
-}

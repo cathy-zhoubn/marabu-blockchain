@@ -1,5 +1,6 @@
 import { send_object, send_getobject, receive_object} from './object';
-import {receive_hello, receive_getpeers, receive_peers} from './peers'
+import {receive_hello, receive_getpeers, receive_peers} from './peers';
+import {receive_block} from './block';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -75,7 +76,12 @@ export async function process_data(data:any, socket:any){
         await receive_object(await JSON.stringify(data.object), socket);
     } else if (data.type == "ihaveobject") {
         let objid = data.objectid;
+        console.log(
+            `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
+        );
         send_getobject(objid, socket);
+    } else if (data.type == "block") {
+        await receive_block(data, socket); 
     }
     else {
         socket_error(data, socket);
