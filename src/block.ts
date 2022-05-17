@@ -1,16 +1,18 @@
 import hash, { blockSize } from "fast-sha256";
-import { broadcast, all_sockets, socket_error } from "./socket";
+import { broadcast, all_sockets, socket_error, send_format } from "./socket";
 import { canonicalize, canonicalizeEx } from 'json-canonicalize';
-import {hash_string, is_hex} from "./helpers";
+import { hash_string, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
+import { isNumberObject } from "util/types";
 
 
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
-
+let chain_tip:any = null;
+let max_height:number = 0;
 
 export async function receive_block(data: any, socket: any) {
     console.log(
@@ -73,18 +75,23 @@ export async function validate_block(data:any, socket:any){
         return false;
     }
     // validate all txids
-    if (!await validate_txids(data, socket)) return false;
+    let coinbase = null; // coinbase, set after validate_txids
+    let coinbase_id = null;
+    if (!await validate_txids(data,coinbase, coinbase_id, socket)) return false;
     else {
         if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
             return false;
         }
     }
 
+    // update chain tip if all checks pass
+    await update_chain_tip(data, blockid);
+
     return true;
 
 }
 
-function valid_pow(block: any, blockid:string, socket: any,) {
+function valid_pow(block: any, blockid:string, socket: any) {
     let blockid_num = parseInt(blockid, 16);
     let target_num = parseInt(block.T, 16);
     if (blockid_num >= target_num){
@@ -94,7 +101,7 @@ function valid_pow(block: any, blockid:string, socket: any,) {
     return true;
 }
 
-async function validate_txids(block:any, socket:any) {
+async function validate_txids(block:any, coinbase:any, coinbase_id:any, socket:any) {
     // send getobject if txid is not in db
     for (let txid of block.txids){
         await send_getobject(txid, socket);
@@ -111,7 +118,6 @@ async function validate_txids(block:any, socket:any) {
         let txid = block.txids[i];
         let tx = JSON.parse(await get_object(txid));
         console.log("executing " + i)
-        let coinbase = null;
         if ((!tx.hasOwnProperty("inputs")) && (tx.hasOwnProperty("height"))){
             console.log("entered")
             // if coinbase is not the first
@@ -121,21 +127,21 @@ async function validate_txids(block:any, socket:any) {
             }
             if (!validate_coinbase(tx, socket)) return false;
             if (!await validate_coinbase_conservation(block, tx, socket)) return false;
-            coinbase = txid;
+            coinbase = tx;
+            coinbase_id = txid;
         }
-        // check all other tx does not spend from voinbase
+        // check all other tx does not spend from coinbase
         // TODO: this is not tested!
-        if (coinbase != null && txid != coinbase){
+        if (coinbase != null && txid != coinbase_id){
             for (let txin of tx.inputs){
-                if (txin.outpoint.txid == coinbase){
-                    socket_error(block, socket, "Transaction in block spending on coinbase.");
+                if (txin.outpoint.txid == coinbase_id){
+                    socket_error(block, socket, "Block contains transaction that spends from coinbase.");
                     return false;
                 }
             }
         }
     }
     return true;
-
 }
 
 //  validate law of conservation for the coinbase
@@ -217,10 +223,46 @@ async function check_timestamp(created: number, prev_id: string){
 
     return (created > prev_block.created && created < currentTime)
 }
+async function update_chain_tip(block: any, blockid:any) {
+    // if height is larger than previous, then it's a new chaintip!
+    let block_height = await get_block_height(block.previd);
+    if (block_height > max_height){
+        max_height = block_height;
+        chain_tip = blockid;
+        console.log("New chain tip to update: " + blockid);
+    }
+}
+
+export function send_chaintip(socket: any) {
+    socket.write(send_format({
+            type: "chaintip",
+            blockid: chain_tip,
+        })
+    )
+}
+
+export async function recieve_chaintip(blockid:any, socket:any){
+    // if chaintip is not the same as the current chain tip, then update
+    if (blockid != chain_tip){
+        await has_object(blockid).then(async (val) => {
+            if (<any>val){
+                // if we have object, then check if chain tip is up to date
+                await get_object(blockid).then(async (result) => {
+                    let block = JSON.parse(result);
+                    await update_chain_tip(block, blockid);
+                });
+            } else {
+                // if we don't have object, then send getobject and validate
+                send_getobject(blockid, socket);
+            }
+        });
+    }
+}
+
 
 let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
       
-
         // let x = validate_block(JSON.parse(), null);
 console.log(hash_string(canonicalize(tx101.object)));
+
 // console.log(x);
