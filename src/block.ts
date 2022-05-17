@@ -75,9 +75,7 @@ export async function validate_block(data:any, socket:any){
         return false;
     }
     // validate all txids
-    let coinbase = null; // coinbase, set after validate_txids
-    let coinbase_id = null;
-    if (!await validate_txids(data,coinbase, coinbase_id, socket)) return false;
+    if (!await validate_txids(data, socket)) return false;
     else {
         if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
             return false;
@@ -99,7 +97,7 @@ function valid_pow(block: any, blockid:string, socket: any) {
     return true;
 }
 
-async function validate_txids(block:any, coinbase:any, coinbase_id:any, socket:any) {
+async function validate_txids(block:any, socket:any) {
     // send getobject if txid is not in db
     for (let txid of block.txids){
         await send_getobject(txid, socket);
@@ -111,11 +109,14 @@ async function validate_txids(block:any, coinbase:any, coinbase_id:any, socket:a
             return false;
         }
     }
+    let coinbase = null;
+    let coinbase_id = null;
     //check if first is a coinbase
     for (let i=0; i<block.txids.length; i++){
         let txid = block.txids[i];
         let tx = JSON.parse(await get_object(txid));
         console.log("executing " + i)
+        // this coinbase should be the first
         if ((!tx.hasOwnProperty("inputs")) && (tx.hasOwnProperty("height"))){
             console.log("entered")
             // if coinbase is not the first
@@ -123,6 +124,7 @@ async function validate_txids(block:any, coinbase:any, coinbase_id:any, socket:a
                 socket_error(block, socket, "Coinbase transaction is not the first transaction in the block.");
                 return false;
             }
+            // coinbase is the first -> validate
             if (!validate_coinbase(tx, socket)) return false;
             if (!await validate_coinbase_conservation(block, tx, socket)) return false;
             coinbase = tx;
