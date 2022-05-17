@@ -68,10 +68,8 @@ export async function validate_block(data:any, socket:any){
             return false;
         }
     }
-
     // update chain tip if all checks pass
     update_chain_tip(data, blockid);
-
     return true;
 
 }
