@@ -54,11 +54,6 @@ export async function validate_block(data:any, socket:any){
             socket_error(data, socket, "Block does not have a valid previd.");
             return false;
         } 
-
-        if (!await check_timestamp(data.created, data.prev_id, socket)){
-            socket_error(data, socket, "Invalid creation time");
-            return false;
-        }
     
         if(!await validate_previd(data.previd, socket)) {  //recursively check previd
             socket_error(data, socket, "Some previous blocks are invalid");
