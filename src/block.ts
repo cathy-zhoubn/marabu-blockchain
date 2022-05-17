@@ -206,10 +206,10 @@ async function validate_previd(prev_id: string, socket: any){
 async function get_block_height(prev_id: string){
     var previous = 1
     while(true){
-        if(prev_id == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e"){ //genesis
+        let prev_block = JSON.parse(await get_object(prev_id));
+        if(prev_block.prev_id == null){ //genesis
             return previous
         }
-        let prev_block = JSON.parse(await get_object(prev_id));
         if(prev_block.txids.length > 0){
             let tx = JSON.parse(await get_object(prev_block.txids[0]));
             if(tx.hasOwnProperty("height")){
