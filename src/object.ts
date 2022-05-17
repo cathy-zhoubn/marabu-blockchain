@@ -3,7 +3,7 @@ import { broadcast, send_format, all_sockets } from "./socket";
 
 import { validate_tx_object } from "./transaction";
 import { hash_string } from "./helpers";
-import { checking_previd, validate_block } from "./block";
+import { checking_previd, checking_previd_received, validate_block } from "./block";
 
 export function receive_object(object:string, socket:any){
     console.log(
@@ -21,9 +21,15 @@ export function receive_object(object:string, socket:any){
                 if(json_obj.type == "transaction"){
                     save = await validate_tx_object(json_obj, socket)
                 } else if (json_obj.type == "block"){
+                    if(checking_previd_received.has(obj_hash)){
+                        checking_previd_received.set(obj_hash, true);
+                    }
+
                     save = await validate_block(json_obj, socket)
+                    
                     if(!save && checking_previd.has(obj_hash)){
                         checking_previd.delete(obj_hash)
+                        checking_previd_received.delete(obj_hash);
                     }
                 }
             }

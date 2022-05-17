@@ -12,6 +12,7 @@ import { stringify } from "querystring";
 
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
+export const checking_previd_received = new Map<string, boolean>();
 let chain_tip:any = null;
 let max_height:number = 0;
 
@@ -185,19 +186,22 @@ async function validate_previd(previd: string, socket: any){
 
     send_getobject(previd, socket);
     checking_previd.add(previd);
+    checking_previd_received.set(previd, false)
 
     var valid = false;
     let start = Date.now()
-    while(Date.now() - start < 60000 && checking_previd.has(previd)){
+    while(checking_previd.has(previd) && (checking_previd_received.get(previd)? true : Date.now() - start < 3000)){
         valid = await has_object(previd);
         if(valid) {
             checking_previd.delete(previd);
+            checking_previd_received.delete(previd);
             break;
         }
     }
 
-    if(Date.now() - start >= 60000 && checking_previd.has(previd)){ //if the message is never sent
+    if(!checking_previd_received.get(previd) && checking_previd.has(previd)){ //if the message is never sent
         checking_previd.delete(previd);
+        checking_previd_received.delete(previd);
     }
 
     return valid;
