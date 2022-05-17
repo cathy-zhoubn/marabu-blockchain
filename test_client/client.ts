@@ -282,5 +282,5 @@ function test4_chain(){
     client.write(JSON.stringify(trans4) + "\n");
     client.write(JSON.stringify({"objectid":"0000000196862be06c7175801855ed2886a97f1b2ac4d35c61235278cc4d9c80","type":"getobject"}) + "\n");
     
-    client.write(JSON.stringify({"type": "getchaintip"}));
+    client.write(JSON.stringify({"type": "getchaintip"}) + "\n");
 }
