@@ -174,8 +174,7 @@ async function validate_coinbase_conservation(block: any, coinbase_tx:any, socke
 }
 
 function validate_genesis(data: any, socket: any) {
-    // TODO: validation needed?
-    return true;
+    return (hash_string(canonicalize(data)) == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e")
 }
 
 async function validate_previd(prev_id: string, socket: any){
