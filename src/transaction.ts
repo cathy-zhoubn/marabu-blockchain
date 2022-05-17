@@ -48,6 +48,7 @@ export function validate_coinbase(tx: any, socket:any) {
         socket_error(tx, socket, "Coinbase does not have a valid height");
         return false;
     }
+
     if (!tx.hasOwnProperty("outputs")){
         socket_error(tx, socket, "Coinbase does not have any outputs");
         return false;

@@ -124,6 +124,10 @@ async function validate_txids(block:any, coinbase:any, coinbase_id:any, socket:a
                 return false;
             }
             if (!validate_coinbase(tx, socket)) return false;
+            if (tx.height != await get_block_height(block.prev_id)) {
+                socket_error(block, socket, "Incorrect coinbase height");
+                return false;
+            }
             if (!await validate_coinbase_conservation(block, tx, socket)) return false;
             coinbase = tx;
             coinbase_id = txid;
