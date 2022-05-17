@@ -3,13 +3,15 @@ import { broadcast, send_format, all_sockets } from "./socket";
 
 import { validate_tx_object } from "./transaction";
 import { hash_string } from "./helpers";
-import { validate_block } from "./block";
+import { checking_previd, validate_block } from "./block";
 
 export function receive_object(object:string, socket:any){
     console.log(
         `Receivejson.d object message from ${socket.remoteAddress}:${socket.remotePort}`
     );
-    has_object(hash_string(object)).then(async (result) => {
+
+    let obj_hash = hash_string(object);
+    has_object(obj_hash).then(async (result) => {
         if (!<any>result){
 
             var save = false;
@@ -20,14 +22,17 @@ export function receive_object(object:string, socket:any){
                     save = await validate_tx_object(json_obj, socket)
                 } else if (json_obj.type == "block"){
                     save = await validate_block(json_obj, socket)
+                    if(!save && checking_previd.has(obj_hash)){
+                        checking_previd.delete(obj_hash)
+                    }
                 }
             }
 
             if(save){
-                await add_object(hash_string(object), object);
+                await add_object(obj_hash, object);
                 broadcast(all_sockets, send_format({
                     type: "ihaveobject",
-                    objectid: hash_string(object)
+                    objectid: obj_hash
                 }));
             }
         }

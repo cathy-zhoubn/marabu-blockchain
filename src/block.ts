@@ -9,6 +9,8 @@ import { validate_UTXO } from "./utxo";
 
 
 const coinbase_reward = 50e12;
+export const checking_previd = new Set();
+
 
 export async function receive_block(data: any, socket: any) {
     console.log(
@@ -29,6 +31,7 @@ export async function validate_block(data:any, socket:any){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
     }
+
     if (!data.hasOwnProperty("txids") || !Array.isArray(data.txids)){
         socket_error(data, socket, "Block does not have a valid list of txids.");
         return false;
@@ -43,11 +46,24 @@ export async function validate_block(data:any, socket:any){
     } 
     if (data.previd == null){
         if (!validate_genesis(data, socket)) return false;
+    } else {
+        if ((!is_hex(data.previd, socket) || data.previd.length != 64)){
+            socket_error(data, socket, "Block does not have a valid previd.");
+            return false;
+        } 
+
+        if (!await check_timestamp(data.created, data.prev_id)){
+            socket_error(data, socket, "Invalid creation time");
+            return false;
+        }
+    
+        if(!await validate_previd(data.previd, socket)) {  //recursively check previd
+            socket_error(data, socket, "Some previous blocks are invalid");
+            return false;
+        }
     }
-    else if ((!is_hex(data.previd, socket) || data.previd.length != 64)){
-        socket_error(data, socket, "Block does not have a valid previd.");
-        return false;
-    }
+
+
     if (data.hasOwnProperty("miner") && (typeof data.miner != "string" || data.miner.length > 128)){
         socket_error(data, socket, "Block has an invalid miner.");
         return false;
@@ -152,7 +168,55 @@ function validate_genesis(data: any, socket: any) {
     return true;
 }
 
+async function validate_previd(prev_id: string, socket: any){
+    if(await has_object(prev_id)){
+        return true
+    }
 
+    send_getobject(prev_id, socket);
+    checking_previd.add(prev_id);
+
+    var valid = false;
+    let start = Date.now()
+    while(Date.now() - start < 60000 && checking_previd.has(prev_id)){
+        valid = await has_object(prev_id);
+        if(valid) {
+            checking_previd.delete(prev_id);
+            break;
+        }
+    }
+
+    if(Date.now() - start >= 60000 && checking_previd.has(prev_id)){ //if the message is never sent
+        checking_previd.delete(prev_id);
+    }
+
+    return valid;
+}
+
+async function get_block_height(prev_id: string){
+    var previous = 1
+    while(true){
+        if(prev_id == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e"){ //genesis
+            return previous
+        }
+        let prev_block = JSON.parse(await get_object(prev_id));
+        if(prev_block.txids.length > 0){
+            let tx = JSON.parse(await get_object(prev_block.txids[0]));
+            if(tx.hasOwnProperty("height")){
+                return previous + tx.height
+            }
+        }
+        prev_id = prev_block.prev_id
+        previous++;
+    }
+}
+
+async function check_timestamp(created: number, prev_id: string){
+    var currentTime = + new Date();
+    let prev_block = JSON.parse(await get_object(prev_id));
+
+    return (created > prev_block.created && created < currentTime)
+}
 
 let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
       
