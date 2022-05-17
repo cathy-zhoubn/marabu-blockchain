@@ -95,6 +95,7 @@ async function validate_txids(block:any, socket:any) {
         let txid = block.txids[i];
         let tx = JSON.parse(await get_object(txid));
         console.log("executing " + i)
+        let coinbase = null;
         if ((!tx.hasOwnProperty("inputs")) && (tx.hasOwnProperty("height"))){
             console.log("entered")
             // if coinbase is not the first
@@ -104,6 +105,17 @@ async function validate_txids(block:any, socket:any) {
             }
             if (!validate_coinbase(tx, socket)) return false;
             if (!await validate_coinbase_conservation(block, tx, socket)) return false;
+            coinbase = txid;
+        }
+        // check all other tx does not spend from voinbase
+        // TODO: this is not tested!
+        if (coinbase != null && txid != coinbase){
+            for (let txin of tx.inputs){
+                if (txin.outpoint.txid == coinbase){
+                    socket_error(block, socket, "Transaction in block spending on coinbase.");
+                    return false;
+                }
+            }
         }
     }
     return true;

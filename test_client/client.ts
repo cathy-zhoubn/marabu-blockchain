@@ -27,7 +27,8 @@ client.connect({ port: port, host: host }, function() {
     // test2_tx_grader1();
     // test2_tx_grader2();
 
-    test3_block();
+    // test3_block();
+    test3_failed()
 
 });
 
@@ -165,13 +166,13 @@ function hash_object(object: string) {
 }
 
 function test3_block(){
-    let genesis = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
+    // let genesis = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
     
     // client.write(canonicalize(genesis) + "\n");
     // client.write(canonicalize({"objectid":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","type":"getobject"}) + "\n");
 
-    // let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650421857102,"miner":"grader","nonce":"d20e849d2e19dc7408b0c02d4dba5a1b3895839a4242660ae8ee18a5a97bcae7","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["2aac601bb784c0de6fdbf47918c9928fb0505eda3174d5cc7790f9b7d27e1963"],"type":"block"},"type":"object"}
-    // client.write(JSON.stringify(block1) + "\n");
+    // let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650421857102,"miner":"grader","nonce":"d20e849d2e19dc7408b0c02d4dba5a1b3895839a4242660ae8ee18a5a97bcae7","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["2aac601bb784c0de6fdbf47918c9928fb0505eda3174d5cc7790f9b7d27e1963"],"type":"block"},"type":"object"}
+    // client.write(JSON.stringify(block2) + "\n");
     // let trans1 = {"object":{"height":1,"outputs":[{"pubkey":"6756c64a8f9cdce26a0c390134a780bedaa04dd74722047f3da6600f141e86d3","value":50000000000000}],"type":"transaction"},"type":"object"}
     // client.write(JSON.stringify(trans1) + "\n");
     // client.write(JSON.stringify({"objectid":"00000002364806bfeafd0af08e88805ce14ea2e0222e0d3aaee3fe1809047482","type":"getobject"}) + "\n");
@@ -209,23 +210,23 @@ function test3_block(){
     // let block8 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650421590750,"miner":"grader","nonce":"104069820c2eab27b8ffe14fb9cb52ed97ee1257acd7971f3b4be864622a4586","note":"Two coinbase transactions","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019","6ae846ec1a8c0422ed939f9a64b25093eaf9cb5348ac1365bd9e0b927d710019"],"type":"block"},"type":"object"}
     // client.write(JSON.stringify(block8) + "\n");
 
-    let block91 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650429488757,"miner":"grader","nonce":"b03e884410b399d5e741a406a563247987f6b481ccfaf888cf1da1bc8652f13d","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"],"type":"block"},"type":"object"}
-    let tx91 = {"object":{"height":1,"outputs":[{"pubkey":"62b7c521cd9211579cf70fd4099315643767b96711febaa5c76dc3daf27c281c","value":50000000000000}],"type":"transaction"},"type":"object"}
-    let block92 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650443872692,"miner":"grader","nonce":"3bb79b0f01194f3fc93c1ad5ae581255290928382d43c310de23061187cfb3b9","note":"This block spends coinbase transaction twice","previd":"000000001b4a28cba15006342f40004aba3038c9d04489ffd0f6454eed80fad1","txids":["d33ac384ea704025a6cac53f669c8e924eff7205b0cd0d6a231f0881b6265a8e","b00a4ef2e9a9985700d9b31f84e18b56fdcd7d824e450b276031e53d20a441fe"],"type":"block"},"type":"object"}
-    let tx92 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"d51e82d5c121c5db21c83404aaa3f591f2099bccf731208c4b0b676308be1f994882f9d991c0ebfd8fdecc90a4aec6165fc3440ade9c83b043cba95b2bba1d0a"}],"outputs":[{"pubkey":"228ee807767047682e9a556ad1ed78dff8d7edf4bc2a5f4fa02e4634cfcad7e0","value":49000000000000}],"type":"transaction"},"type":"object"}
-    let tx93 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"5719653765e9a541ba9e6e1173ed05023091294190fc4f21ebc997935d09baf66b6b051368473480d84fb644671aca63e2ad0999c57266098e959b092ea06a0b"}],"outputs":[{"pubkey":"59fe88f36b19b95267f18cf6ad5879afa9fca3b9fec3953d93d3efade5abe294","value":48000000000000}],"type":"transaction"},"type":"object"}
-    client.write(JSON.stringify(block91) + "\n");
-    client.write(JSON.stringify(tx91) + "\n");
-    client.write(JSON.stringify(block92) + "\n");
-    client.write(JSON.stringify(tx92) + "\n");
-    client.write(JSON.stringify(tx93) + "\n");
+    // let block91 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650429488757,"miner":"grader","nonce":"b03e884410b399d5e741a406a563247987f6b481ccfaf888cf1da1bc8652f13d","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"],"type":"block"},"type":"object"}
+    // let tx91 = {"object":{"height":1,"outputs":[{"pubkey":"62b7c521cd9211579cf70fd4099315643767b96711febaa5c76dc3daf27c281c","value":50000000000000}],"type":"transaction"},"type":"object"}
+    // let block92 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650443872692,"miner":"grader","nonce":"3bb79b0f01194f3fc93c1ad5ae581255290928382d43c310de23061187cfb3b9","note":"This block spends coinbase transaction twice","previd":"000000001b4a28cba15006342f40004aba3038c9d04489ffd0f6454eed80fad1","txids":["d33ac384ea704025a6cac53f669c8e924eff7205b0cd0d6a231f0881b6265a8e","b00a4ef2e9a9985700d9b31f84e18b56fdcd7d824e450b276031e53d20a441fe"],"type":"block"},"type":"object"}
+    // let tx92 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"d51e82d5c121c5db21c83404aaa3f591f2099bccf731208c4b0b676308be1f994882f9d991c0ebfd8fdecc90a4aec6165fc3440ade9c83b043cba95b2bba1d0a"}],"outputs":[{"pubkey":"228ee807767047682e9a556ad1ed78dff8d7edf4bc2a5f4fa02e4634cfcad7e0","value":49000000000000}],"type":"transaction"},"type":"object"}
+    // let tx93 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"48c2ae2fbb4dead4bcc5801f6eaa9a350123a43750d22d05c53802b69c7cd9fb"},"sig":"5719653765e9a541ba9e6e1173ed05023091294190fc4f21ebc997935d09baf66b6b051368473480d84fb644671aca63e2ad0999c57266098e959b092ea06a0b"}],"outputs":[{"pubkey":"59fe88f36b19b95267f18cf6ad5879afa9fca3b9fec3953d93d3efade5abe294","value":48000000000000}],"type":"transaction"},"type":"object"}
+    // client.write(JSON.stringify(block91) + "\n");
+    // client.write(JSON.stringify(tx91) + "\n");
+    // client.write(JSON.stringify(block92) + "\n");
+    // client.write(JSON.stringify(tx92) + "\n");
+    // client.write(JSON.stringify(tx93) + "\n");
     
-    let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
-    let block102 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650416900867,"miner":"grader","nonce":"f17f634c8662a18c7f74b36ebbdded2210e66eb07b9c7b47e38e5ab47be7aa88","note":"This block spends a coinbase transaction not in its prev blocks","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["869676c06de441f83e7437db7ad0804bb5b2342f12dd9bbd12ee562d1486f7aa"],"type":"block"},"type":"object"}
-    let tx102 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"535c47f49925a6a64f9fa98f012db3b8d6afebad2029cfa3341abe16abda5d29"},"sig":"774c44c33ffe5727fd9d45a2bfb13415b395eca2ec9fc6e9ea896315a3c0fb4f49f77c497a3a1f7cf7e93b4c844c1aa9e7cd428c077e396f9458850f7dc89e02"}],"outputs":[{"pubkey":"be49ae0682fc38da5c981a36a405a4031ff1b5d3acb541d80e9c8e645b77b340","value":49000000000000}],"type":"transaction"},"type":"object"}
-    client.write(JSON.stringify(tx101) + "\n");
-    client.write(JSON.stringify(block102) + "\n");
-    client.write(JSON.stringify(tx102) + "\n");
+    // let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
+    // let block102 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650416900867,"miner":"grader","nonce":"f17f634c8662a18c7f74b36ebbdded2210e66eb07b9c7b47e38e5ab47be7aa88","note":"This block spends a coinbase transaction not in its prev blocks","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["869676c06de441f83e7437db7ad0804bb5b2342f12dd9bbd12ee562d1486f7aa"],"type":"block"},"type":"object"}
+    // let tx102 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"535c47f49925a6a64f9fa98f012db3b8d6afebad2029cfa3341abe16abda5d29"},"sig":"774c44c33ffe5727fd9d45a2bfb13415b395eca2ec9fc6e9ea896315a3c0fb4f49f77c497a3a1f7cf7e93b4c844c1aa9e7cd428c077e396f9458850f7dc89e02"}],"outputs":[{"pubkey":"be49ae0682fc38da5c981a36a405a4031ff1b5d3acb541d80e9c8e645b77b340","value":49000000000000}],"type":"transaction"},"type":"object"}
+    // client.write(JSON.stringify(tx101) + "\n");
+    // client.write(JSON.stringify(block102) + "\n");
+    // client.write(JSON.stringify(tx102) + "\n");
 
 
     // client.write(canonicalize({"object": block1_transaction, "type":"object"}) + "\n");
@@ -234,66 +235,16 @@ function test3_block(){
     // client.write(canonicalize({"object": fake_block_1, "type":"object"}) + "\n");
 }
 
-
-
-
-
-
-let block1 = {
-    "nonce": "c5ee71be4ca85b160d352923a84f86f44b7fc4fe60002214bc1236ceedc5c615",
-    "T": "00000002af000000000000000000000000000000000000000000000000000000",
-    "created": 1649827795114,
-    "miner": "svatsan",
-    "note": "First block. Yayy, I have 50 bu now!!",
-    "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
-    "txids": [
-    "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af"
-    ],
-    "type": "block"
+function test3_failed(){
+    let gen ={"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
+    let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000048d3978f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["a8dce60f89fba3cfcc8bef6a16c80c9b0a0b178eaf378589d62b8e5354867425"],"type":"block"},"type":"object"}
+    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020c5e20f","note":"This block has another coinbase and spends earlier coinbase","previd":"000000017c4ecb9f44f2003ec3b47dd4335bff5a84bb0f464193e4cca700f7e4","txids":["72dc0438756e7b32e849e495e2252a4a6b4fd699c705ffee7d27342ed135fde1","f67b65f34c00f7d7293bc6b58194739fb38848ebab78099c2c51d8abefdb3c99"],"type":"block"},"type":"object"}
+    let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000002122f9f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a"],"type":"block"},"type":"object"}
+    let block4 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000008514b524","note":"This block has a transaction spending the coinbase","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a","5dbf776d4227962fef8fc877143401196a98f401827b40b3f2971c8ed3fa8d9c"],"type":"block"},"type":"object"}
+    client.write(JSON.stringify(gen) + "\n");
+    client.write(JSON.stringify(block1) + "\n");
+    // client.write(JSON.stringify(block2) + "\n");
+    // client.write(JSON.stringify(block3) + "\n");
+    // client.write(JSON.stringify(block4) + "\n");
+    
 }
-
-let block1_transaction = {
-    "height": 0,
-    "outputs": [{
-        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-        "value": 50000000000
-    }],
-    "type": "transaction"
-}
-
-let block1_fake_transaction = {
-    "height": 1,
-    "outputs": [{
-        "pubkey": "8dbcd2401c89c04d6e53c81c90aa0b551cc8fc47c0469217c8f5cfbae1e911f9",
-        "value": 500000000000000000000000000000000000
-    }],
-    "type": "transaction"
-}
-
-let block1_fake_id = "64b96bc22b1c7692ce8f176200f0f8bae14a1693ce6ae53f0597c384d30533d3"
-
-let fake_noncb_tx = { "type": "transaction", "inputs": [ { "outpoint": { "txid": "f71408bf847d7dd15824574a7cd4afdfaaa2866286910675cd3fc371507aa196", "index": 0 }, "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 5100000000 } ] }
-
-let fake_block_1 = {
-    "nonce": "c5ee71be4ca85b160d352923a84f86f44b7fc4fe60002214bc1236ceedc5c615",
-    "T": "ee000002af000000000000000000000000000000000000000000000000000000",
-    "created": 1649827795114,
-    "miner": "svatsan",
-    "note": "First block. Yayy, I have 50 bu now!!",
-    "previd": "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e",
-    "txids": [
-        "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", 
-        "fe4bfc1abba7ef4c3f32f261a4b6f948ce4388be6ef7deed62f9186b896e9e29"
-    ],
-    "type": "block"
-}
-
-let trans_2 = { 
-    "type": "transaction", 
-    "inputs": [ { 
-        "outpoint": { 
-            "txid": "1bb37b637d07100cd26fc063dfd4c39a7931cc88dae3417871219715a5e374af", 
-            "index": 0 
-        }, 
-        "sig": "3869a9ea9e7ed926a7c8b30fb71f6ed151a132b03fd5dae764f015c98271000e7da322dbcfc97af7931c23c0fae060e102446ccff0f54ec00f9978f3a69a6f0f" } ], 
-        "outputs": [ { "pubkey": "077a2683d776a71139fd4db4d00c16703ba0753fc8bdc4bd6fc56614e659cde3", "value": 51000 } ] }
