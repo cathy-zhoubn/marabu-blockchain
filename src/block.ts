@@ -30,7 +30,7 @@ export async function validate_block(data:any, socket:any){
         return false;
     }
     // Check proof of work
-    // if (!valid_pow(data, blockid, socket)) return false; //TODO: uncomment
+    if (!valid_pow(data, blockid, socket)) return false; 
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
@@ -137,7 +137,6 @@ async function validate_txids(block:any, socket:any) {
             coinbase_id = txid;
         }
         // check all other tx does not spend from coinbase
-        // TODO: this is not tested!
         if (coinbase != null && txid != coinbase_id){
             for (let txin of tx.inputs){
                 if (txin.outpoint.txid == coinbase_id){
