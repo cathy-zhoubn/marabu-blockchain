@@ -53,14 +53,14 @@ export async function validate_block(data:any, socket:any){
             socket_error(data, socket, "Block does not have a valid previd.");
             return false;
         } 
-
-        if (!await check_timestamp(data.created, data.prev_id)){
-            socket_error(data, socket, "Invalid creation time");
-            return false;
-        }
     
         if(!await validate_previd(data.previd, socket)) {  //recursively check previd
             socket_error(data, socket, "Some previous blocks are invalid");
+            return false;
+        }
+
+        if (!await check_timestamp(data.created, data.prev_id)){
+            socket_error(data, socket, "Invalid creation time");
             return false;
         }
     }
@@ -223,7 +223,7 @@ async function get_block_height(prev_id: string){
 async function check_timestamp(created: number, prev_id: string){
     var currentTime = + new Date();
     let prev_block = JSON.parse(await get_object(prev_id));
-
+    console.log(created + " " + prev_block.created + " " + currentTime)
     return (created > prev_block.created && created < currentTime)
 }
 async function update_chain_tip(block: any, blockid:any) {
