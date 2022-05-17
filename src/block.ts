@@ -239,7 +239,7 @@ export function send_chaintip(socket: any) {
     )
 }
 
-export async function recieve_chaintip(blockid:any, socket:any){
+export async function receive_chaintip(blockid:any, socket:any){
     // if chaintip is not the same as the current chain tip, then update
     if (blockid != chain_tip){
         await has_object(blockid).then(async (val) => {
