@@ -70,7 +70,7 @@ export async function validate_block(data:any, socket:any){
     }
 
     // update chain tip if all checks pass
-    update_chain_tip(blockid, coinbase, socket);
+    update_chain_tip(data, blockid);
 
     return true;
 
@@ -160,22 +160,41 @@ function validate_genesis(data: any, socket: any) {
 }
 
 
-function update_chain_tip(blockid: any, coinbase: any, socket: any) {
-     // if height is larger than previous, then it's a new chaintip!
-    if (coinbase.height > max_height){
-        max_height = coinbase.height;
+function update_chain_tip(block: any, blockid:any) {
+    // if height is larger than previous, then it's a new chaintip!
+    let block_height = calculate_height(block.previd);
+    if (block_height > max_height){
+        max_height = block_height;
         chain_tip = blockid;
-        console.log("New chain tip: " + blockid);
-        // broadcast new chain tip
-        // socket.write(send_format({
-        //         type: "chaintip",
-        //         blockid: blockid,
-        //     })
-        // )
+        console.log("New chain tip to update: " + blockid);
     }
 }
 
+export function send_chaintip(socket: any) {
+    socket.write(send_format({
+            type: "chaintip",
+            blockid: chain_tip,
+        })
+    )
+}
 
+export async function recieve_chaintip(blockid:any, socket:any){
+    // if chaintip is not the same as the current chain tip, then update
+    if (blockid != chain_tip){
+        await has_object(blockid).then((val) => {
+            if (<any>val){
+                // if we have object, then check if chain tip is up to date
+                get_object(blockid).then((result) => {
+                    let block = JSON.parse(result);
+                    update_chain_tip(block, blockid);
+                });
+            } else {
+                // if we don't have object, then send getobject and validate
+                send_getobject(blockid, socket);
+            }
+        });
+    }
+}
 
 
 let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}

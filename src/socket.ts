@@ -1,11 +1,12 @@
 import { send_object, send_getobject, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers';
-import {receive_block} from './block';
+import {receive_block, send_chaintip, receive_chaintip} from './block';
 import { send } from 'process';
 import { canonicalize } from 'json-canonicalize';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
+export const get_chaintip = { type: "getchaintip"}
 
 export const all_sockets = new Set();
 export function broadcast(all_sockets:Set<any>, data: any){ //TODO: conditions to delete from set
@@ -71,15 +72,35 @@ export async function process_data(data:any, socket:any){
     } else if (data.type == "peers") {
         receive_peers(data, socket);
     } else if (data.type == "getobject") {
+        if (!data.hasOwnProperty("objectid")) {
+            socket_error(data, socket, "getobject message does not contain 'objectid' field");
+            return;
+        }
         send_object(data.objectid, socket);
     } else if (data.type == "object") {
+        if (!data.hasOwnProperty("object")) {
+            socket_error(data, socket, "object message does not contain 'object' field");
+            return;
+        }
         receive_object(canonicalize(data.object), socket);
     } else if (data.type == "ihaveobject") {
+        if (!data.hasOwnProperty("objectid")) {
+            socket_error(data, socket, "ihaveobject message does not contain 'objectid' field");
+            return;
+        }
         let objid = data.objectid;
         console.log(
             `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
         );
         send_getobject(objid, socket);
+    } else if (data.type == "getchaintip") {
+        send_chaintip(socket);
+    } else if (data.type == "chaintip") {
+        if (!data.hasOwnProperty("blockid")) {
+            socket_error(data, socket, "getchaintip message does not contain 'blockid' field");
+            return;
+        }
+        await receive_chaintip(data.blockid, socket);
     }
     else {
         socket_error(data, socket);
@@ -120,6 +141,7 @@ export function socket_handler(socket: any) {
     //add_ip(socket.remoteAddress);socket.write
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
+    socket.write(send_format(get_chaintip))
 
     socket.on("data", function (chunk: any) {
         data_handler(chunk, leftover, socket, initialized)
