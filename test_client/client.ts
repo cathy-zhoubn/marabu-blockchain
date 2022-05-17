@@ -28,7 +28,9 @@ client.connect({ port: port, host: host }, function() {
     // test2_tx_grader2();
 
     // test3_block();
-    test3_failed()
+    // test3_failed()
+
+    test4_chain();
 
 });
 
@@ -236,15 +238,49 @@ function test3_block(){
 }
 
 function test3_failed(){
-    let gen ={"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
-    let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000048d3978f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["a8dce60f89fba3cfcc8bef6a16c80c9b0a0b178eaf378589d62b8e5354867425"],"type":"block"},"type":"object"}
-    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020c5e20f","note":"This block has another coinbase and spends earlier coinbase","previd":"000000017c4ecb9f44f2003ec3b47dd4335bff5a84bb0f464193e4cca700f7e4","txids":["72dc0438756e7b32e849e495e2252a4a6b4fd699c705ffee7d27342ed135fde1","f67b65f34c00f7d7293bc6b58194739fb38848ebab78099c2c51d8abefdb3c99"],"type":"block"},"type":"object"}
-    let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000002122f9f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a"],"type":"block"},"type":"object"}
-    let block4 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000008514b524","note":"This block has a transaction spending the coinbase","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a","5dbf776d4227962fef8fc877143401196a98f401827b40b3f2971c8ed3fa8d9c"],"type":"block"},"type":"object"}
+    let gen = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
+    let block1 = {"object":{"height":1,"outputs":[{"pubkey":"2545c0cf0d68a55f224e6d997b90295f5dc811204f3296aad761b14245b8011f","value":50000000000000}],"type":"transaction"},"type":"object"}
+    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000048d3978f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["a8dce60f89fba3cfcc8bef6a16c80c9b0a0b178eaf378589d62b8e5354867425"],"type":"block"},"type":"object"}
+    let block3 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"a8dce60f89fba3cfcc8bef6a16c80c9b0a0b178eaf378589d62b8e5354867425"},"sig":"3f86c5b33355d67329bed01a1ff5fcb05643a686ee6f7326328d2a5f616b1d992e89fbcaf54a572bd4f79fdb97f3442b49ee6b46190ac8b2fe17242f1de5ad07"}],"outputs":[{"pubkey":"8606c53f1e5efa6cad2db6b009a4429274ede8f0dab321ebfbb55bfb0efb1bb7","value":49000000000000}],"type":"transaction"},"type":"object"}
+    let block4 = {"object":{"height":2,"outputs":[{"pubkey":"1a2f8b8698c467643ffe59902e0eeab0989b723605da8de70378eb85d59dff54","value":51000000000000}],"type":"transaction"},"type":"object"}
+    let block5 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020c5e20f","note":"This block has another coinbase and spends earlier coinbase","previd":"000000017c4ecb9f44f2003ec3b47dd4335bff5a84bb0f464193e4cca700f7e4","txids":["72dc0438756e7b32e849e495e2252a4a6b4fd699c705ffee7d27342ed135fde1","f67b65f34c00f7d7293bc6b58194739fb38848ebab78099c2c51d8abefdb3c99"],"type":"block"},"type":"object"}
+    let block6 = {"object":{"height":1,"outputs":[{"pubkey":"a1f947ad8bdacb2ce828001f53114a114877c7f544d6648f68b1ad498699492e","value":50000000000000}],"type":"transaction"},"type":"object"}
+    let block7 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000002122f9f","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a"],"type":"block"},"type":"object"}
+    let block8 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a"},"sig":"70fc79646486dfdc938e6a03839dc1fd09aebce8a04c64e2ccb5b52676579dfa4f6ae671950dbf8ef08d1330670761839bc3cd9c310064d8e7492b312b92cc00"}],"outputs":[{"pubkey":"a1f947ad8bdacb2ce828001f53114a114877c7f544d6648f68b1ad498699492e","value":40000000000000}],"type":"transaction"},"type":"object"}
+    let block9 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1650650324705,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000008514b524","note":"This block has a transaction spending the coinbase","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["cd60a35605170d6fbad30843416d01e3e3716b39dbc3dc47962c920ad47a094a","5dbf776d4227962fef8fc877143401196a98f401827b40b3f2971c8ed3fa8d9c"],"type":"block"},"type":"object"}
+
     client.write(JSON.stringify(gen) + "\n");
     client.write(JSON.stringify(block1) + "\n");
-    // client.write(JSON.stringify(block2) + "\n");
-    // client.write(JSON.stringify(block3) + "\n");
-    // client.write(JSON.stringify(block4) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(block4) + "\n");
+    client.write(JSON.stringify(block5) + "\n");
+    client.write(JSON.stringify(block6) + "\n");
+    client.write(JSON.stringify(block7) + "\n");
+    client.write(JSON.stringify(block8) + "\n");
+    client.write(JSON.stringify(block9) + "\n");
     
+}
+
+function test4_chain(){
+    let genesis = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1624219079,"miner":"dionyziz","nonce":"0000000000000000000000000000000000000000000000000000002634878840","note":"The Economist 2021-06-20: Crypto-miners are probably to blame for the graphics-chip shortage","previd":null as any,"txids":[] as any,"type":"block"},"type":"object"}
+    
+    client.write(canonicalize(genesis) + "\n");
+    client.write(canonicalize({"objectid":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","type":"getobject"}) + "\n");
+
+    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1652772747,"miner":"grader","nonce":"d20e849d2e19dc7408b0c02d4dba5a1b3895839a4242660ae8ee18a5a97bcae7","note":"This block has a coinbase transaction","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["2aac601bb784c0de6fdbf47918c9928fb0505eda3174d5cc7790f9b7d27e1963"],"type":"block"},"type":"object"}
+    client.write(JSON.stringify(block2) + "\n");
+    let trans1 = {"object":{"height":1,"outputs":[{"pubkey":"6756c64a8f9cdce26a0c390134a780bedaa04dd74722047f3da6600f141e86d3","value":50000000000000}],"type":"transaction"},"type":"object"}
+    client.write(JSON.stringify(trans1) + "\n");
+    client.write(JSON.stringify({"objectid":"00000002364806bfeafd0af08e88805ce14ea2e0222e0d3aaee3fe1809047482","type":"getobject"}) + "\n");
+
+    let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1652772748,"miner":"grader","nonce":"eab983d7bf941a212915b2155375e5ae308e23fe346155f8c8cb552c4ac98e51","note":"This block has another coinbase and spends earlier coinbase","previd":"00000002364806bfeafd0af08e88805ce14ea2e0222e0d3aaee3fe1809047482","txids":["1db7b7b6a0971aac14cc3a5114864c89c0455c2baebf3050760c30a24964cf7c","314e63a79f51450750282a02bc669d799781b222379930be635d7f2429c0fb36"],"type":"block"},"type":"object"}
+    client.write(JSON.stringify(block3) + "\n");
+    let trans3 = {"object":{"height":2,"outputs":[{"pubkey":"25ecf98703df4843d1dac2754776044cbec63082bf563bf23ccb2a2adf8d93e6","value":51000000000000}],"type":"transaction"},"type":"object"}
+    let trans4={"object":{"inputs":[{"outpoint":{"index":0,"txid":"2aac601bb784c0de6fdbf47918c9928fb0505eda3174d5cc7790f9b7d27e1963"},"sig":"55158c00fd062e2567580bcedf38399807440481b3af74c1959405e4f372d0f487ce742924e5c5ef9e4aefea4083658a0ee0633abb28bbef6e866ac79eb62b02"}],"outputs":[{"pubkey":"4f7a7107ee295c381fea1ffa3c0a20c313f80a88c859eac7a556de9a65407822","value":49000000000000}],"type":"transaction"},"type":"object"}
+    client.write(JSON.stringify(trans3) + "\n");
+    client.write(JSON.stringify(trans4) + "\n");
+    client.write(JSON.stringify({"objectid":"0000000196862be06c7175801855ed2886a97f1b2ac4d35c61235278cc4d9c80","type":"getobject"}) + "\n");
+    
+    client.write(JSON.stringify({"type": "getchaintip"}));
 }

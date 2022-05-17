@@ -7,6 +7,7 @@ import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
 import { isNumberObject } from "util/types";
+import { stringify } from "querystring";
 
 
 const coinbase_reward = 50e12;
@@ -28,7 +29,7 @@ export async function validate_block(data:any, socket:any){
         return false;
     }
     // Check proof of work
-    if (!valid_pow(data, blockid, socket)) return false;
+    // if (!valid_pow(data, blockid, socket)) return false; //TODO: uncomment
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
