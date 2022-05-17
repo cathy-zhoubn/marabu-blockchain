@@ -60,7 +60,7 @@ export async function validate_block(data:any, socket:any){
             return false;
         }
 
-        if (!await check_timestamp(data.created, data.prev_id, socket)){
+        if (!await check_timestamp(data.created, data.previd)){
             socket_error(data, socket, "Invalid creation time");
             return false;
         }
@@ -127,7 +127,7 @@ async function validate_txids(block:any, socket:any) {
             }
             // coinbase is the first -> validate
             if (!validate_coinbase(tx, socket)) return false;
-            if (tx.height != await get_block_height(block.prev_id)) {
+            if (tx.height != await get_block_height(block.previd)) {
                 socket_error(block, socket, "Incorrect coinbase height");
                 return false;
             }
@@ -178,36 +178,36 @@ function validate_genesis(data: any, socket: any) {
     return (hash_string(canonicalize(data)) == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e")
 }
 
-async function validate_previd(prev_id: string, socket: any){
-    if(await has_object(prev_id)){
+async function validate_previd(previd: string, socket: any){
+    if(await has_object(previd)){
         return true
     }
 
-    checking_previd.add(prev_id);
-    send_getobject(prev_id, socket);
+    send_getobject(previd, socket);
+    checking_previd.add(previd);
 
     var valid = false;
     let start = Date.now()
-    while(Date.now() - start < 60000 && checking_previd.has(prev_id)){
-        valid = await has_object(prev_id);
+    while(Date.now() - start < 60000 && checking_previd.has(previd)){
+        valid = await has_object(previd);
         if(valid) {
-            checking_previd.delete(prev_id);
+            checking_previd.delete(previd);
             break;
         }
     }
 
-    if(Date.now() - start >= 60000 && checking_previd.has(prev_id)){ //if the message is never sent
-        checking_previd.delete(prev_id);
+    if(Date.now() - start >= 60000 && checking_previd.has(previd)){ //if the message is never sent
+        checking_previd.delete(previd);
     }
 
     return valid;
 }
 
-async function get_block_height(prev_id: string){
+async function get_block_height(previd: string){
     var previous = 1
     while(true){
-        let prev_block = JSON.parse(await get_object(prev_id));
-        if(prev_block.prev_id == null){ //genesis
+        let prev_block = JSON.parse(await get_object(previd));
+        if(prev_block.previd == null){ //genesis
             return previous
         }
         if(prev_block.txids.length > 0){
@@ -216,22 +216,17 @@ async function get_block_height(prev_id: string){
                 return previous + tx.height
             }
         }
-        prev_id = prev_block.prev_id
+        previd = prev_block.previd
         previous++;
     }
 }
 
-async function check_timestamp(created: number, prev_id: string, socket:any){
+async function check_timestamp(created: number, previd: string){
     var currentTime = + new Date();
-    let prev_block = JSON.parse(await get_object(prev_id));
-
-    socket.write(JSON.stringify(created));
-
-    console.log(prev_block.created)
-    socket.write(JSON.stringify(prev_block.created));
-    socket.write(JSON.stringify(created > prev_block.created)); // TODO: delete
-    socket.write(JSON.stringify(created < currentTime));
-    return (created > prev_block.created && created < currentTime);
+    let prev_block = JSON.parse(await get_object(previd));
+    console.log(previd)
+    console.log(created + " " + prev_block.created + " " + currentTime)
+    return (created > prev_block.created && created < currentTime)
 }
 async function update_chain_tip(block: any, blockid:any) {
     // if height is larger than previous, then it's a new chaintip!
