@@ -45,18 +45,6 @@ export async function get_object(objectid: string){
   }
 }
 
-export async function get_height(objectid: string){
-  const text = `SELECT * FROM objects WHERE object_id=$1;`;
-  const values = [objectid];
-  const result = await pool.query(text, values);
-  try{
-    return result.rows[0]["object"]
-  } catch(e) {
-    console.log("Failed to get object")
-    return 0;
-  }
-}
-
 export async function has_object(objectid: string){
   const text = `SELECT COUNT(*) FROM objects WHERE object_id=$1;`;
   const values = [objectid];

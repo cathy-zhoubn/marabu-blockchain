@@ -64,6 +64,11 @@ export async function validate_block(data:any, socket:any){
             socket_error(data, socket, "Some previous blocks are invalid");
             return false;
         }
+
+        if (!await check_timestamp(data.created, data.prev_id, socket)){
+            socket_error(data, socket, "Invalid creation time");
+            return false;
+        }
     }
 
 
@@ -175,8 +180,7 @@ async function validate_coinbase_conservation(block: any, coinbase_tx:any, socke
 }
 
 function validate_genesis(data: any, socket: any) {
-    // TODO: validation needed?
-    return true;
+    return (hash_string(canonicalize(data)) == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e")
 }
 
 async function validate_previd(prev_id: string, socket: any){
