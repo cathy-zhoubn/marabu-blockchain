@@ -7,6 +7,7 @@ import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
 import { isNumberObject } from "util/types";
+import { stringify } from "querystring";
 
 
 const coinbase_reward = 50e12;
@@ -28,7 +29,7 @@ export async function validate_block(data:any, socket:any){
         return false;
     }
     // Check proof of work
-    if (!valid_pow(data, blockid, socket)) return false;
+    // if (!valid_pow(data, blockid, socket)) return false; //TODO: uncomment
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
@@ -54,7 +55,7 @@ export async function validate_block(data:any, socket:any){
             return false;
         } 
 
-        if (!await check_timestamp(data.created, data.prev_id)){
+        if (!await check_timestamp(data.created, data.prev_id, socket)){
             socket_error(data, socket, "Invalid creation time");
             return false;
         }
@@ -221,11 +222,17 @@ async function get_block_height(prev_id: string){
     }
 }
 
-async function check_timestamp(created: number, prev_id: string){
+async function check_timestamp(created: number, prev_id: string, socket:any){
     var currentTime = + new Date();
     let prev_block = JSON.parse(await get_object(prev_id));
 
-    return (created > prev_block.created && created < currentTime)
+    socket.write(JSON.stringify(created));
+
+    console.log(prev_block.created)
+    socket.write(JSON.stringify(prev_block.created));
+    socket.write(JSON.stringify(created > prev_block.created)); // TODO: delete
+    socket.write(JSON.stringify(created < currentTime));
+    return (created > prev_block.created && created < currentTime);
 }
 async function update_chain_tip(block: any, blockid:any) {
     // if height is larger than previous, then it's a new chaintip!
