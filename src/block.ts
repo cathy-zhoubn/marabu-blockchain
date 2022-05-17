@@ -10,6 +10,7 @@ import { isNumberObject } from "util/types";
 
 
 const coinbase_reward = 50e12;
+export const checking_previd = new Set();
 let chain_tip:any = null;
 let max_height:number = 0;
 
@@ -32,6 +33,7 @@ export async function validate_block(data:any, socket:any){
         socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
     }
+
     if (!data.hasOwnProperty("txids") || !Array.isArray(data.txids)){
         socket_error(data, socket, "Block does not have a valid list of txids.");
         return false;
@@ -46,11 +48,24 @@ export async function validate_block(data:any, socket:any){
     } 
     if (data.previd == null){
         if (!validate_genesis(data, socket)) return false;
+    } else {
+        if ((!is_hex(data.previd, socket) || data.previd.length != 64)){
+            socket_error(data, socket, "Block does not have a valid previd.");
+            return false;
+        } 
+
+        if (!await check_timestamp(data.created, data.prev_id)){
+            socket_error(data, socket, "Invalid creation time");
+            return false;
+        }
+    
+        if(!await validate_previd(data.previd, socket)) {  //recursively check previd
+            socket_error(data, socket, "Some previous blocks are invalid");
+            return false;
+        }
     }
-    else if ((!is_hex(data.previd, socket) || data.previd.length != 64)){
-        socket_error(data, socket, "Block does not have a valid previd.");
-        return false;
-    }
+
+
     if (data.hasOwnProperty("miner") && (typeof data.miner != "string" || data.miner.length > 128)){
         socket_error(data, socket, "Block has an invalid miner.");
         return false;
@@ -69,7 +84,7 @@ export async function validate_block(data:any, socket:any){
         }
     }
     // update chain tip if all checks pass
-    update_chain_tip(data, blockid);
+    await update_chain_tip(data, blockid);
     return true;
 
 }
@@ -157,10 +172,58 @@ function validate_genesis(data: any, socket: any) {
     return true;
 }
 
+async function validate_previd(prev_id: string, socket: any){
+    if(await has_object(prev_id)){
+        return true
+    }
 
-function update_chain_tip(block: any, blockid:any) {
+    send_getobject(prev_id, socket);
+    checking_previd.add(prev_id);
+
+    var valid = false;
+    let start = Date.now()
+    while(Date.now() - start < 60000 && checking_previd.has(prev_id)){
+        valid = await has_object(prev_id);
+        if(valid) {
+            checking_previd.delete(prev_id);
+            break;
+        }
+    }
+
+    if(Date.now() - start >= 60000 && checking_previd.has(prev_id)){ //if the message is never sent
+        checking_previd.delete(prev_id);
+    }
+
+    return valid;
+}
+
+async function get_block_height(prev_id: string){
+    var previous = 1
+    while(true){
+        if(prev_id == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e"){ //genesis
+            return previous
+        }
+        let prev_block = JSON.parse(await get_object(prev_id));
+        if(prev_block.txids.length > 0){
+            let tx = JSON.parse(await get_object(prev_block.txids[0]));
+            if(tx.hasOwnProperty("height")){
+                return previous + tx.height
+            }
+        }
+        prev_id = prev_block.prev_id
+        previous++;
+    }
+}
+
+async function check_timestamp(created: number, prev_id: string){
+    var currentTime = + new Date();
+    let prev_block = JSON.parse(await get_object(prev_id));
+
+    return (created > prev_block.created && created < currentTime)
+}
+async function update_chain_tip(block: any, blockid:any) {
     // if height is larger than previous, then it's a new chaintip!
-    let block_height = calculate_height(block.previd);
+    let block_height = await get_block_height(block.previd);
     if (block_height > max_height){
         max_height = block_height;
         chain_tip = blockid;
@@ -179,12 +242,12 @@ export function send_chaintip(socket: any) {
 export async function recieve_chaintip(blockid:any, socket:any){
     // if chaintip is not the same as the current chain tip, then update
     if (blockid != chain_tip){
-        await has_object(blockid).then((val) => {
+        await has_object(blockid).then(async (val) => {
             if (<any>val){
                 // if we have object, then check if chain tip is up to date
-                get_object(blockid).then((result) => {
+                await get_object(blockid).then(async (result) => {
                     let block = JSON.parse(result);
-                    update_chain_tip(block, blockid);
+                    await update_chain_tip(block, blockid);
                 });
             } else {
                 // if we don't have object, then send getobject and validate
