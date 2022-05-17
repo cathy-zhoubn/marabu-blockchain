@@ -183,8 +183,8 @@ async function validate_previd(prev_id: string, socket: any){
         return true
     }
 
-    send_getobject(prev_id, socket);
     checking_previd.add(prev_id);
+    send_getobject(prev_id, socket);
 
     var valid = false;
     let start = Date.now()
