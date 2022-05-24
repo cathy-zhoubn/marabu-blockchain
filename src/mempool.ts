@@ -1,9 +1,7 @@
 import { has_object } from "./db";
 import { all_sockets, broadcast, send_format } from "./socket";
 
-
-
-
+export const mempool = new Set<String>();
 
 export function get_objects_in_mempool(txids:any) {
     for (let txid of txids) {
