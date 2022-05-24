@@ -7,9 +7,10 @@ import { canonicalize } from 'json-canonicalize';
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
 export const get_chaintip = { type: "getchaintip"}
+export const get_mempool = { type: "getmempool" };
 
 export const all_sockets = new Set();
-export function broadcast(all_sockets:Set<any>, data: any){ //TODO: conditions to delete from set
+export function broadcast(all_sockets:Set<any>, data: any){
     all_sockets.forEach((socket) => {
         socket.write(data);
     });
@@ -101,6 +102,12 @@ export async function process_data(data:any, socket:any){
             return;
         }
         await receive_chaintip(data.blockid, socket);
+    } else if (data.type == "mempool") {
+        if (!data.hasOwnProperty("txids")) {
+            socket_error(data, socket, "mempool message does not contain 'mempool' field");
+            return;
+        }
+        get_objects_in_mempool(data.txids, socket);
     }
     else {
         socket_error(data, socket);
@@ -141,7 +148,8 @@ export function socket_handler(socket: any) {
     //add_ip(socket.remoteAddress);socket.write
     socket.write(send_format(hello));
     socket.write(send_format(get_peers));
-    socket.write(send_format(get_chaintip))
+    socket.write(send_format(get_chaintip));
+    socket.write(send_format(get_mempool));
 
     socket.on("data", function (chunk: any) {
         data_handler(chunk, leftover, socket, initialized)

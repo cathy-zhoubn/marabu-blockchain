@@ -1,7 +1,7 @@
 import hash, { blockSize } from "fast-sha256";
 import { broadcast, all_sockets, socket_error, send_format } from "./socket";
 import { canonicalize, canonicalizeEx } from 'json-canonicalize';
-import { hash_string, is_hex} from "./helpers";
+import { hash_string, is_ascii, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
@@ -68,11 +68,11 @@ export async function validate_block(data:any, socket:any){
     }
 
 
-    if (data.hasOwnProperty("miner") && (typeof data.miner != "string" || data.miner.length > 128)){
+    if (data.hasOwnProperty("miner") && (!is_ascii(data) || data.miner.length > 128)){
         socket_error(data, socket, "Block has an invalid miner.");
         return false;
     }
-    if (data.hasOwnProperty("note") && (typeof data.note != "string" || data.note.length > 128)){
+    if (data.hasOwnProperty("note") && (!is_ascii(data) || data.note.length > 128)){
         socket_error(data, socket, "Block has an invalid note.");
         return false;
     }

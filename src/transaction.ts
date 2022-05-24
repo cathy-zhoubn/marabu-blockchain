@@ -72,18 +72,29 @@ export function validate_coinbase(tx: any, socket:any) {
 
 export async function validate_transaction(object: any, socket:any){
     let input_sum = 0;
+    let outpoints = [] as any;
     for (let input of object.inputs){
+        // if input's outpoint is duplicated, error
+        if (outpoints.indexOf(input.outpoint.txid) != -1){
+            socket_error(object, socket, "Transaction has duplicate inputs of the same outpoint");
+            return false;
+        }
+        outpoints.push(input.outpoint.txid);
+
+        // validate input tx
         let val = await validate_tx_input(object, input, socket);
         if (val == -1){
             return false
         }
         input_sum += val;
     }
+    // validate output tx
     var output_sum = validate_tx_output(object.outputs, socket);
     if(output_sum == -1){
         return false;
     }
-    console.log("output_sum: " + output_sum);
+    
+    // validate weak law of conservation
     if (input_sum < output_sum){
         socket_error(object, socket, "Transaction input sum is less than output sum");
         return false;

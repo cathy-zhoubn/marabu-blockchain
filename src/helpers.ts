@@ -20,3 +20,15 @@ export function hash_string(str: string) {
     let hashed = sha256(nacl.util.decodeUTF8(str));
     return Buffer.from(hashed).toString('hex');
 }
+
+export function is_ascii(key:string){
+    if (!(typeof key == "string")){
+        return false;
+    }
+    for (let letter of key){
+        if (!(letter >= ' ' && letter <= '~')){
+            return false;
+        }
+    }
+    return true;
+}
