@@ -51,7 +51,11 @@ export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old
     let ct_new = JSON.parse(await get_object(ctid_new));
     let ct_old = JSON.parse(await get_object(ctid_old));
     let curr_new = ct_new; // pointer tracing back from new chain
-    
+
+    // trace back h_diff steps to before
+    for (let i = 0; i < h_diff; i++){
+        curr_new = JSON.parse(await get_object(curr_new.previd));
+    }
     // no reorg, just update
     if (canonicalize(curr_new) == canonicalize(ct_old)){
         for (let txid of old_mempool){
