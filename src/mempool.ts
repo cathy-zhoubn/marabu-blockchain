@@ -13,6 +13,9 @@ export function update_mempool(tx: any) {
 
     let txid = hash_string(canonicalize(tx));
 
+    if(!tx.hasOwnProperty("inputs")){
+        return
+    }
     for(let input of tx.inputs){
         let outpoint = input.outpoint
         if(!temp_utxo.has(canonicalize(outpoint))){
