@@ -3,6 +3,7 @@ import { has_object, get_object } from "./db";
 import { is_hex } from "./helpers";
 import * as ed from '@noble/ed25519';
 import { canonicalize } from "json-canonicalize";
+import { update_mempool } from "./mempool";
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
@@ -33,7 +34,12 @@ export async function validate_tx_object(tx:any, socket:any) {
             socket_error(tx, socket, "Transaction does not have any inputs");
             return false;
         }
-        return await validate_transaction(tx, socket);
+        if(await validate_transaction(tx, socket)){
+            update_mempool(tx);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     socket_error(socket, "Transaction object does not include required keys");

@@ -1,13 +1,11 @@
-import hash, { blockSize } from "fast-sha256";
-import { broadcast, all_sockets, socket_error, send_format } from "./socket";
-import { canonicalize, canonicalizeEx } from 'json-canonicalize';
+import { socket_error, send_format } from "./socket";
+import { canonicalize } from 'json-canonicalize';
 import { hash_string, is_ascii, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
-import { isNumberObject } from "util/types";
-import { stringify } from "querystring";
+
 
 
 const coinbase_reward = 50e12;
@@ -78,11 +76,11 @@ export async function validate_block(data:any, socket:any){
     }
     // validate all txids
     if (!await validate_txids(data, socket)) return false;
-    else {
-        if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
-            return false;
-        }
+
+    if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
+        return false;
     }
+    
     // update chain tip if all checks pass
     await update_chain_tip(data, blockid);
     return true;
