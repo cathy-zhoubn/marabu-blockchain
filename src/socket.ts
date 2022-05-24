@@ -107,6 +107,7 @@ export async function process_data(data:any, socket:any){
             return;
         }
         get_objects_in_mempool(data.txids);
+    } else if (data.type == "error") {
     }
     else {
         socket_error(data, socket);
@@ -160,6 +161,6 @@ export function socket_handler(socket: any) {
     });
 
     socket.on("error", function (err: any) {
-        //console.log(`Error: ${err}`);
+        // console.log(`Error: ${err}`);
     });
 }
