@@ -4,14 +4,14 @@ import { hash_string } from "./helpers";
 import { canonicalize } from "json-canonicalize";
 
 
-export const mempool = new Set<string>(); //txids
+export const mempool : Array<string> = []; //txids
 export const temp_utxo = new Set(); //outpoints in canonicalized string format
 
 export function update_mempool(tx: any) {
     //for each outpoint see if temp_utxo has it
 
     let txid = hash_string(canonicalize(tx));
-    
+
     for(let input of tx.inputs){
         let outpoint = input.outpoint
         if(!temp_utxo.has(canonicalize(outpoint))){
@@ -32,7 +32,7 @@ export function update_mempool(tx: any) {
         temp_utxo.add(canonicalize({"txid": txid, "index": i}))
     }
 
-    mempool.add(txid)
+    mempool.push(txid)
 }
 
 export function get_objects_in_mempool(txids:any) {
