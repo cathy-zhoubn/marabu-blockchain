@@ -5,8 +5,8 @@ import { hash_string } from "./helpers";
 import { canonicalize } from "json-canonicalize";
 
 
-export const mempool : Array<string> = []; //txids
-export const temp_utxo = new Set(); //outpoints in canonicalized string format
+export let mempool : Array<string> = []; //txids
+export let temp_utxo = new Set(); //outpoints in canonicalized string format
 
 export function update_mempool(tx: any) {
     //for each outpoint see if temp_utxo has it
@@ -38,7 +38,7 @@ export function update_mempool(tx: any) {
 
 export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old:any, socket:any){
     let old_mempool = mempool
-    mempool = new Set<string>();
+    mempool = new Array<string>();
     temp_utxo = new Set();
     
     // update utxo
@@ -54,10 +54,8 @@ export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old
     
     // no reorg, just update
     if (canonicalize(curr_new) == canonicalize(ct_old)){
-        while(old_mempool.size){
-            let temp_txid = old_mempool.values().next().value;
-            old_mempool.delete(temp_txid);
-            update_mempool(temp_txid);
+        for (let txid of old_mempool){
+            update_mempool(txid);
         }
         return;
     }
@@ -81,12 +79,9 @@ export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old
         }
     }
     // add old mempool to mempool
-    while(old_mempool.size){
-        let temp_txid = old_mempool.values().next().value;
-        old_mempool.delete(temp_txid);
-        update_mempool(temp_txid);
-    }
-    
+    for (let txid of old_mempool){
+        update_mempool(txid);
+    }   
 }
 
 export function get_objects_in_mempool(txids:any) {
