@@ -28,7 +28,6 @@ export function data_handler(
 ) {
     //processing the input
     let original: string = chunk.toString();
-    // console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
     let tokenized = original.split("\n");
     tokenized[0] = leftover.value + tokenized[0];
     leftover.value = tokenized.pop();
@@ -112,7 +111,6 @@ export async function process_data(data:any, socket:any){
     else {
         socket_error(data, socket);
     }
-
 }
 
 export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){

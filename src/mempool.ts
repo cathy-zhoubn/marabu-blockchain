@@ -1,4 +1,5 @@
-import { get_object, has_object } from "./db";
+import { Stack } from "stack-typescript";
+import { get_object, get_UTXO_table, has_object } from "./db";
 import { all_sockets, broadcast, send_format } from "./socket";
 import { hash_string } from "./helpers";
 import { canonicalize } from "json-canonicalize";
@@ -33,6 +34,59 @@ export function update_mempool(tx: any) {
     }
 
     mempool.push(txid)
+}
+
+export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old:any, socket:any){
+    let old_mempool = mempool
+    mempool = new Set<string>();
+    temp_utxo = new Set();
+    
+    // update utxo
+    let utxo = await get_UTXO_table(ctid_new);
+    for(let tx of utxo){
+        temp_utxo.add(tx);
+    }
+    
+    let h_diff = h_new - h_old;
+    let ct_new = JSON.parse(await get_object(ctid_new));
+    let ct_old = JSON.parse(await get_object(ctid_old));
+    let curr_new = ct_new; // pointer tracing back from new chain
+    
+    // no reorg, just update
+    if (canonicalize(curr_new) == canonicalize(ct_old)){
+        while(old_mempool.size){
+            let temp_txid = old_mempool.values().next().value;
+            old_mempool.delete(temp_txid);
+            update_mempool(temp_txid);
+        }
+        return;
+    }
+
+    // needs chain reorg
+    let backward_stack = new Stack(); // stack for blocks in the old chain
+    let curr_old = ct_old; // pointer tracing back from old chain
+    
+    // trace back to the common ancestor
+    while (canonicalize(curr_old) != canonicalize(curr_new)){
+        backward_stack.push(curr_old);
+        curr_new = JSON.parse(await get_object(curr_new.previd));
+        curr_old = JSON.parse(await get_object(curr_old.previd));
+    }
+
+    // add tx in reorged blocks into mempool
+    while(backward_stack.size){
+        let temp_block:any = backward_stack.pop();
+        for (let txid of temp_block.txids){
+            update_mempool(txid);
+        }
+    }
+    // add old mempool to mempool
+    while(old_mempool.size){
+        let temp_txid = old_mempool.values().next().value;
+        old_mempool.delete(temp_txid);
+        update_mempool(temp_txid);
+    }
+    
 }
 
 export function get_objects_in_mempool(txids:any) {

@@ -46,8 +46,6 @@ export async function validate_tx_object(tx:any, socket:any) {
     return false;
 }
 
-
-
 export function validate_coinbase(tx: any, socket:any) {
     //check if coinbase has correct format
     if (!tx.hasOwnProperty("height") || !(typeof tx.height == "number") || tx.height < 0){
@@ -114,7 +112,7 @@ async function validate_tx_input(object:any, input:any, socket:any){
         return -1;
     }
     if (!input.outpoint.hasOwnProperty("txid") || !input.outpoint.hasOwnProperty("index")
-        || ! (typeof input.outpoint.index == "number") || ! (input.outpoint.index >= 0) || !validate_key(input.outpoint.txid, socket)){
+        || !(typeof input.outpoint.index == "number") || !(input.outpoint.index >= 0) || !validate_key(input.outpoint.txid, socket)){
         socket_error(object, socket, "Some transaction input outpoint does not have valid txid or index");
         return -1;
     }
@@ -133,24 +131,24 @@ async function validate_tx_input(object:any, input:any, socket:any){
 }
 
 async function validate_signature(input:any, no_sig:any, key:string, socket:any){
-    // if (!is_hex(input.sig, socket)){
-    //     socket_error(input, socket, "Signature does not have a valid format");
-    //     return false;
-    // }
-    // let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
-    // let mes = nacl.util.decodeUTF8(canonicalize(no_sig));
-    // let isValid = false;
-    // try {
-    //     isValid = await ed.verify(sig, mes, key);
-    // } catch (error) {
-    //     socket_error(input, socket, "Signature is not valid");
-    //     return false;
-    // }
+    if (!is_hex(input.sig, socket)){
+        socket_error(input, socket, "Signature does not have a valid format");
+        return false;
+    }
+    let sig = Uint8Array.from(Buffer.from(input.sig, 'hex'));
+    let mes = nacl.util.decodeUTF8(canonicalize(no_sig));
+    let isValid = false;
+    try {
+        isValid = await ed.verify(sig, mes, key);
+    } catch (error) {
+        socket_error(input, socket, "Signature is not valid");
+        return false;
+    }
     
-    // if (!isValid){
-    //     socket_error(input, socket, "Some transaction input does not have a valid signature");
-    //     return false;
-    // }
+    if (!isValid){
+        socket_error(input, socket, "Some transaction input does not have a valid signature");
+        return false;
+    }
     return true;
 }
 

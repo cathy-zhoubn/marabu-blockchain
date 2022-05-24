@@ -42,13 +42,3 @@ export async function validate_UTXO(previd: string, currentid: string, txids: [s
 
 	return true;
 }
-
-
-// let [key, val] = await get_object(txid).then((prev_tx) => {
-// 	prev_tx = JSON.parse(prev_tx);
-// 	if (index >= prev_tx.outputs.length){
-// 		socket_error(txid, socket, "Transaction input index exeeds limit");
-// 		return [-1, -1];
-// 	}
-// 	return [prev_tx.outputs[index].pubkey, prev_tx.outputs[index].value];
-// });

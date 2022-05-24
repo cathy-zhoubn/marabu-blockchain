@@ -20,6 +20,7 @@ export function receive_object(object:string, socket:any){
             if(json_obj.hasOwnProperty("type")){
                 if(json_obj.type == "transaction"){
                     save = await validate_tx_object(json_obj, socket)
+                    
                 } else if (json_obj.type == "block"){
                     if(checking_previd_received.has(obj_hash)){
                         checking_previd_received.set(obj_hash, true);
