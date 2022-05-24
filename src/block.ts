@@ -7,7 +7,6 @@ import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
 import { reorg_mempool } from "./mempool";
 
-
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
 export const checking_previd_received = new Map<string, boolean>();
@@ -77,11 +76,11 @@ export async function validate_block(data:any, socket:any){
     }
     // validate all txids
     if (!await validate_txids(data, socket)) return false;
-    else {
-        if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
-            return false;
-        }
+
+    if (! await validate_UTXO(data.previd, blockid, data.txids, socket)){
+        return false;
     }
+    
     // update chain tip if all checks pass
     await update_chain_tip(data, blockid, socket);
     return true;

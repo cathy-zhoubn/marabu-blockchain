@@ -94,16 +94,3 @@ export async function get_UTXO_table(blockid: string) { //return a set
   }
   return set;
 }
-
-const set = new Set()
-// set.add({"txid": "1", "index": 1})
-// set.add({"txid": "2", "index": 2})
-// save_to_UTXO_table("1", set)
-
-// has_UTXO_lable("1", "1", 1).then((set) => {
-//   console.log(set)
-// })
-
-// get_UTXO_table("1").then((set) => {
-//   console.log(set)
-// })

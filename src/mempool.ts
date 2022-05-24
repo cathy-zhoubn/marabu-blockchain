@@ -1,7 +1,8 @@
-import { canonicalize } from "json-canonicalize";
 import { Stack } from "stack-typescript";
 import { get_object, has_object } from "./db";
 import { all_sockets, broadcast, send_format } from "./socket";
+import { hash_string } from "./helpers";
+import { canonicalize } from "json-canonicalize";
 
 
 export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old:any, socket:any){
@@ -65,6 +66,10 @@ export function get_objects_in_mempool(txids:any) {
                     type: "getobject",
                     objectid: txid
                 }));
+            } else {
+                get_object(txid).then((result) => {
+                    update_mempool(JSON.parse(result));
+                });
             }
         });
     }
