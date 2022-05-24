@@ -3,6 +3,7 @@ import {receive_hello, receive_getpeers, receive_peers} from './peers';
 import {receive_block, send_chaintip, receive_chaintip} from './block';
 import { send } from 'process';
 import { canonicalize } from 'json-canonicalize';
+import { get_objects_in_mempool } from './mempool';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -28,7 +29,6 @@ export function data_handler(
 ) {
     //processing the input
     let original: string = chunk.toString();
-    // console.log(`Data received from ${socket.remoteAddress}:${socket.remotePort}: ${original}`);
     let tokenized = original.split("\n");
     tokenized[0] = leftover.value + tokenized[0];
     leftover.value = tokenized.pop();
@@ -107,12 +107,11 @@ export async function process_data(data:any, socket:any){
             socket_error(data, socket, "mempool message does not contain 'mempool' field");
             return;
         }
-        get_objects_in_mempool(data.txids, socket);
+        get_objects_in_mempool(data.txids);
     }
     else {
         socket_error(data, socket);
     }
-
 }
 
 export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){

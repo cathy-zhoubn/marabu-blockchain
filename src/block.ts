@@ -1,20 +1,19 @@
-import hash, { blockSize } from "fast-sha256";
-import { broadcast, all_sockets, socket_error, send_format } from "./socket";
-import { canonicalize, canonicalizeEx } from 'json-canonicalize';
+import { socket_error, send_format } from "./socket";
+import { canonicalize } from 'json-canonicalize';
 import { hash_string, is_ascii, is_hex} from "./helpers";
 import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
-import { isNumberObject } from "util/types";
-import { stringify } from "querystring";
+import { reorg_mempool } from "./mempool";
 
 
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
 export const checking_previd_received = new Map<string, boolean>();
-let chain_tip:any = null;
-let max_height:number = 0;
+
+export let chain_tip:any = null; // blockid of the chain tip
+export let max_height:number = 0; // length of the longest chain
 
 export async function receive_block(data: any, socket: any) {
     console.log(
@@ -84,7 +83,7 @@ export async function validate_block(data:any, socket:any){
         }
     }
     // update chain tip if all checks pass
-    await update_chain_tip(data, blockid);
+    await update_chain_tip(data, blockid, socket);
     return true;
 
 }
@@ -207,19 +206,19 @@ async function validate_previd(previd: string, socket: any){
 }
 
 async function get_block_height(previd: string){
-    var previous = 1
+    var previous = 0;
     while(true){
         let prev_block = JSON.parse(await get_object(previd));
         if(prev_block.previd == null){ //genesis
-            return previous
+            return previous;
         }
         if(prev_block.txids.length > 0){
             let tx = JSON.parse(await get_object(prev_block.txids[0]));
             if(tx.hasOwnProperty("height")){
-                return previous + tx.height
+                return previous + tx.height;
             }
         }
-        previd = prev_block.previd
+        previd = prev_block.previd;
         previous++;
     }
 }
@@ -227,14 +226,16 @@ async function get_block_height(previd: string){
 async function check_timestamp(created: number, previd: string){
     var currentTime = + new Date();
     let prev_block = JSON.parse(await get_object(previd));
-    console.log(previd)
-    console.log(created + " " + prev_block.created + " " + currentTime)
-    return (created > prev_block.created && created < currentTime)
+    console.log(previd);
+    console.log(created + " " + prev_block.created + " " + currentTime);
+    return (created > prev_block.created && created < currentTime);
 }
-async function update_chain_tip(block: any, blockid:any) {
+
+async function update_chain_tip(block: any, blockid:any, socket:any) {
     // if height is larger than previous, then it's a new chaintip!
     let block_height = await get_block_height(block.previd);
     if (block_height > max_height){
+        reorg_mempool(chain_tip, blockid, max_height, block_height, socket);
         max_height = block_height;
         chain_tip = blockid;
         console.log("New chain tip to update: " + blockid);
@@ -246,7 +247,7 @@ export function send_chaintip(socket: any) {
             type: "chaintip",
             blockid: chain_tip,
         })
-    )
+    );
 }
 
 export async function receive_chaintip(blockid:any, socket:any){
@@ -257,7 +258,7 @@ export async function receive_chaintip(blockid:any, socket:any){
                 // if we have object, then check if chain tip is up to date
                 await get_object(blockid).then(async (result) => {
                     let block = JSON.parse(result);
-                    await update_chain_tip(block, blockid);
+                    await update_chain_tip(block, blockid, socket);
                 });
             } else {
                 // if we don't have object, then send getobject and validate

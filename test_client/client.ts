@@ -1,4 +1,4 @@
-import { canonicalize, canonicalizeEx } from 'json-canonicalize';
+import { canonicalize } from 'json-canonicalize';
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 import sha256 from "fast-sha256";

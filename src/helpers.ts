@@ -1,5 +1,4 @@
 
-import { socket_error } from "./socket";
 import sha256 from 'fast-sha256'
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
