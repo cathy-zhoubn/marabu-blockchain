@@ -50,5 +50,3 @@ export async function run_server() {
 
 
 let x = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6"},"sig":"f64a8fb07971588ff438fa5a4e7df694ce978e9ccbb92c22fb36c6ed4b7e434b19fa04f01027903f49d0222111229fa924a0edecb07a7f120a19221ce42e6d0b"},{"outpoint":{"index":0,"txid":"45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6"},"sig":"f64a8fb07971588ff438fa5a4e7df694ce978e9ccbb92c22fb36c6ed4b7e434b19fa04f01027903f49d0222111229fa924a0edecb07a7f120a19221ce42e6d0b"}],"outputs":[{"pubkey":"5f0b5847953fdd1c3db2f4622b9d507fdcc16b96a33557ea51ac189d772a8697","value":10}],"type":"transaction"},"type":"object"}
-    
-console.log(hash_string(canonicalize(x)))

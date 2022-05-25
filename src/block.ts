@@ -225,7 +225,7 @@ async function update_chain_tip(block: any, blockid:any, socket:any) {
     // if height is larger than previous, then it's a new chaintip!
     let block_height = await get_block_height(block.previd);
     if (block_height > max_height){
-        reorg_mempool(chain_tip, blockid, max_height, block_height, socket);
+        reorg_mempool(blockid, chain_tip, block_height, max_height, socket);
         max_height = block_height;
         chain_tip = blockid;
         console.log("New chain tip to update: " + blockid);

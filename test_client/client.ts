@@ -35,8 +35,8 @@ client.connect({ port: port, host: host }, function() {
     test5_1();
     test5_2();
     // test5_3();
-    test5_4();
-    // test5_5();
+    // test5_4();
+    test5_5();
     // test5_6();
 
 
@@ -375,16 +375,17 @@ function test5_5(){
     let tx5 = {"object":{"height":17,"outputs":[{"pubkey":"30dd2e554fe1a9db05b58bf3b96b9aaa2b503e566347ec0a50bf73a4c339a05d","value":400}],"type":"transaction"},"type":"object"}
     let message = {"type":"getmempool"}
     
-    client.write(JSON.stringify(block1) + "\n");
-    client.write(JSON.stringify(block2) + "\n");
-    client.write(JSON.stringify(block3) + "\n");
-    client.write(JSON.stringify(block4) + "\n");
-    client.write(JSON.stringify(block5) + "\n");
     client.write(JSON.stringify(tx1) + "\n");
     client.write(JSON.stringify(tx2) + "\n");
     client.write(JSON.stringify(tx3) + "\n");
     client.write(JSON.stringify(tx4) + "\n");
     client.write(JSON.stringify(tx5) + "\n");
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(block4) + "\n");
+    client.write(JSON.stringify(block5) + "\n");
+
     client.write(JSON.stringify(message) + "\n");
 
 
