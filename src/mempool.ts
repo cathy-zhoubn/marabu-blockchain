@@ -51,6 +51,11 @@ export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old
     }
     
     let h_diff = h_new - h_old;
+
+    if (! await has_object(ctid_new)){
+        return;
+    }
+    
     let ct_new = JSON.parse(await get_object(ctid_new));
     let ct_old = JSON.parse(await get_object(ctid_old));
     let curr_new = ct_new; // pointer tracing back from new chain

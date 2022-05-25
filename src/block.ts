@@ -11,7 +11,7 @@ const coinbase_reward = 50e12;
 export const checking_previd = new Set();
 export const checking_previd_received = new Map<string, boolean>();
 
-export let chain_tip:any = null; // blockid of the chain tip
+export let chain_tip:any = "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e"; // blockid of the chain tip
 export let max_height:number = 0; // length of the longest chain
 
 export async function validate_block(data:any, socket:any){

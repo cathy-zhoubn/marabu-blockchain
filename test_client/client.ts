@@ -34,10 +34,10 @@ client.connect({ port: port, host: host }, function() {
 
     test5_1();
     test5_2();
-    // test5_3();
+    test5_3();
     test5_4();
-    // test5_5();
-    // test5_6();
+    test5_5();
+    test5_6();
 
 
 });
@@ -374,17 +374,38 @@ function test5_5(){
     let tx4 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"87630141045652f4e6c809255782b0b14dd4f9a3af9cdd148d8eede4a3c2092c"},"sig":"8c3b77b75f25ec8771b25226bf52325f6de0db49fc29d47ebaa6c34d3091ee402de03de9c2aa6143cf31b80a5b78d01bf2352cf815a9c7d803161961bbf75600"}],"outputs":[{"pubkey":"db7e2816d787d252d81248fdbf8696686dde9a0aa16931b400c5d21412c273b7","value":20}],"type":"transaction"},"type":"object"}
     let tx5 = {"object":{"height":17,"outputs":[{"pubkey":"30dd2e554fe1a9db05b58bf3b96b9aaa2b503e566347ec0a50bf73a4c339a05d","value":400}],"type":"transaction"},"type":"object"}
     let message = {"type":"getmempool"}
+
+    /* 
+    hashes
+    3838027f66729e4d9408eef6460d64b7fb81a861ee9012a1549ecd7866a04097
+    aa82e97e2eaab8d4d455312c8626e0af86844a3b91b42729be14822048223455
+    090365b8931464e4a5a36e3a1eb0096a6e256ef82c629e7ddf5bae344e96fe51
+
+    87b88433cba3876d5a43447b214c7dfd34e4418a5e0ac1ddd5d284f3808ccd19
+    f3fb9aad35939b6ee4313e44e5b4dfc69e3b92656c69a5027f30ac3bb4a784ff
+    1d3b01349053811c44b0312020f0b0f97504b977a78204adf2adefcbb8f1b9c2
+
+    45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6
+
+    6e178b3baca1fa769fadec32767c748cc0836ecf5e14442a79910f39d107d738
+    07d98e28713c5df2da66b2eb4b05a351828ae26810830c2c8fa1c068de8024b0
+    214ea8757fe8105d93186b3641d5277db26c9b6eb303b08e53143d7c25e1a6d8
+    dead89172b652654a10b372753609659f022d86f4682a90744a5d6d942265aca
+    a4e7b5540544b8f2093ab61a931fa89c120fc3297ef43c291e9ae621f55524d5
+    */
     
-    client.write(JSON.stringify(block1) + "\n");
-    client.write(JSON.stringify(block2) + "\n");
-    client.write(JSON.stringify(block3) + "\n");
-    client.write(JSON.stringify(block4) + "\n");
-    client.write(JSON.stringify(block5) + "\n");
     client.write(JSON.stringify(tx1) + "\n");
     client.write(JSON.stringify(tx2) + "\n");
     client.write(JSON.stringify(tx3) + "\n");
     client.write(JSON.stringify(tx4) + "\n");
     client.write(JSON.stringify(tx5) + "\n");
+
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(block4) + "\n");
+    client.write(JSON.stringify(block5) + "\n");
+   
     client.write(JSON.stringify(message) + "\n");
 
 

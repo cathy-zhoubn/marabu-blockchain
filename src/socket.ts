@@ -107,7 +107,8 @@ export async function process_data(data:any, socket:any){
             return;
         }
         get_objects_in_mempool(data.txids);
-    } else if (data.type == "error") {
+    } 
+    else if (data.type == "error") {
     }
     else {
         socket_error(data, socket);

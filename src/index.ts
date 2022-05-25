@@ -3,4 +3,4 @@ import {run_client} from './client';
   
 
 run_server();
-// run_client();
+run_client();
