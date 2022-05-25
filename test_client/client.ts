@@ -30,7 +30,15 @@ client.connect({ port: port, host: host }, function() {
     // test3_block();
     // test3_failed()
 
-    test3_failed();
+    // test3_failed();
+
+    test5_1();
+    test5_2();
+    test5_3();
+    test5_4();
+    test5_5();
+    test5_6();
+
 
 });
 
@@ -295,6 +303,13 @@ function test5_1() {
     let tx3 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"3838027f66729e4d9408eef6460d64b7fb81a861ee9012a1549ecd7866a04097"},"sig":"04e7892df0baf874f97afa4cbe8b4222ad1dc01045b3ae30c6b91777b113c3f4e2e899ab795bfdec82b3cbd02e9b1bdd01c09f14c7a5ebe3f8ec5e04a5b8cf07"},{"outpoint":{"index":0,"txid":"aa82e97e2eaab8d4d455312c8626e0af86844a3b91b42729be14822048223455"},"sig":"04e7892df0baf874f97afa4cbe8b4222ad1dc01045b3ae30c6b91777b113c3f4e2e899ab795bfdec82b3cbd02e9b1bdd01c09f14c7a5ebe3f8ec5e04a5b8cf07"}],"outputs":[{"pubkey":"433ea9cedb21d2acf4efad3b864431ffeb66187bd2527a1d2523f5db3654cb36","value":10}],"type":"transaction"},"type":"object"}
     let message3 = {"objectid":"000000029c6411250ae74efcfbc83a16588d55d98b49d7540e284cdb4b7ab6ac","type":"getobject"}
 
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(tx1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(tx2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(tx3) + "\n");
+    client.write(JSON.stringify(message3) + "\n");
     /* 
     expect    
     Grader received message: {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653164322,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000001b8db7343","note":"Third block","previd":"000000016dc7aee35b78c658b05e0caf4057958d2ce0208424b03e91192a312d","txids":["090365b8931464e4a5a36e3a1eb0096a6e256ef82c629e7ddf5bae344e96fe51"],"type":"block"},"type":"object"}
@@ -309,6 +324,14 @@ function test5_2(){
     let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653140604,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000003ab77c19","note":"Third block","previd":"00000000f5f5b0d8b556257f205e9dc9e6c59bd1ca885e46811d32f9f9a5bff9","txids":["1d3b01349053811c44b0312020f0b0f97504b977a78204adf2adefcbb8f1b9c2"],"type":"block"},"type":"object"}
     let tx3 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"87b88433cba3876d5a43447b214c7dfd34e4418a5e0ac1ddd5d284f3808ccd19"},"sig":"86defafef965e6960d9ce4bd5d1a488666dc0b70b26378fc03534e3404ef1544c53d2377e7e7566502a6e81984dcb0f94df951495f34f6a8f0d8a05f49626604"},{"outpoint":{"index":0,"txid":"f3fb9aad35939b6ee4313e44e5b4dfc69e3b92656c69a5027f30ac3bb4a784ff"},"sig":"86defafef965e6960d9ce4bd5d1a488666dc0b70b26378fc03534e3404ef1544c53d2377e7e7566502a6e81984dcb0f94df951495f34f6a8f0d8a05f49626604"}],"outputs":[{"pubkey":"c4a19efd87ff220307c667e775b032089b5c6ac2abc35887d5540268d00f54e2","value":10}],"type":"transaction"},"type":"object"}
     let message = {"objectid":"00000000c06249202135071c3662ed9d9e26d924ba9dd29d61af4b8e55e2dcdb","type":"getobject"}
+    
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(tx1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(tx2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(tx3) + "\n");
+    client.write(JSON.stringify(message) + "\n");
     /* 
     Expect
     {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653140604,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000003ab77c19","note":"Third block","previd":"00000000f5f5b0d8b556257f205e9dc9e6c59bd1ca885e46811d32f9f9a5bff9","txids":["1d3b01349053811c44b0312020f0b0f97504b977a78204adf2adefcbb8f1b9c2"],"type":"block"},"type":"object"}
@@ -319,6 +342,11 @@ function test5_3(){
     let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653179285,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000007f41b71e","note":"First block","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6"],"type":"block"},"type":"object"}
     let tx1 = {"object":{"height":1,"outputs":[{"pubkey":"5f0b5847953fdd1c3db2f4622b9d507fdcc16b96a33557ea51ac189d772a8697","value":400}],"type":"transaction"},"type":"object"}
     let block2 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6"},"sig":"f64a8fb07971588ff438fa5a4e7df694ce978e9ccbb92c22fb36c6ed4b7e434b19fa04f01027903f49d0222111229fa924a0edecb07a7f120a19221ce42e6d0b"},{"outpoint":{"index":0,"txid":"45b83ca1f7d6d083bd5116866f006b3979d15bc11ee32546e6cf7c84e4c3eee6"},"sig":"f64a8fb07971588ff438fa5a4e7df694ce978e9ccbb92c22fb36c6ed4b7e434b19fa04f01027903f49d0222111229fa924a0edecb07a7f120a19221ce42e6d0b"}],"outputs":[{"pubkey":"5f0b5847953fdd1c3db2f4622b9d507fdcc16b96a33557ea51ac189d772a8697","value":10}],"type":"transaction"},"type":"object"}
+    
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(tx1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+
     /* 
     expect: error, not gossip
     */
@@ -326,6 +354,8 @@ function test5_3(){
 
 function test5_4(){
     let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653183619,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020bb67aa","note":"This block contains a long note which is more than 128 characters. Therefore, this block is an invalid block. You should ensure that the note and miner fields in a block are ASCII-printable strings up to 128 characters long each.","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":[],"type":"block"},"type":"object"}
+    
+    client.write(JSON.stringify(block1) + "\n");
     /* 
     expect
     error, not gossip
@@ -344,6 +374,20 @@ function test5_5(){
     let tx4 = {"object":{"inputs":[{"outpoint":{"index":0,"txid":"87630141045652f4e6c809255782b0b14dd4f9a3af9cdd148d8eede4a3c2092c"},"sig":"8c3b77b75f25ec8771b25226bf52325f6de0db49fc29d47ebaa6c34d3091ee402de03de9c2aa6143cf31b80a5b78d01bf2352cf815a9c7d803161961bbf75600"}],"outputs":[{"pubkey":"db7e2816d787d252d81248fdbf8696686dde9a0aa16931b400c5d21412c273b7","value":20}],"type":"transaction"},"type":"object"}
     let tx5 = {"object":{"height":17,"outputs":[{"pubkey":"30dd2e554fe1a9db05b58bf3b96b9aaa2b503e566347ec0a50bf73a4c339a05d","value":400}],"type":"transaction"},"type":"object"}
     let message = {"type":"getmempool"}
+    
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(block4) + "\n");
+    client.write(JSON.stringify(block5) + "\n");
+    client.write(JSON.stringify(tx1) + "\n");
+    client.write(JSON.stringify(tx2) + "\n");
+    client.write(JSON.stringify(tx3) + "\n");
+    client.write(JSON.stringify(tx4) + "\n");
+    client.write(JSON.stringify(tx5) + "\n");
+    client.write(JSON.stringify(message) + "\n");
+
+
     /* 
     expect correct mempool */
 
@@ -354,5 +398,10 @@ function test5_6(){
     let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219130,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000008e23df","note":"New fifth block","previd":"00000001b5d7cce513920e64f3d4ed0d21b0a1c99004803ba219f4941f61adc1","txids":[],"type":"block"},"type":"object"}
     let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219149,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000f17794a4","note":"New sixth block","previd":"00000000bff3ae7c1b919013557f000e6e46e36ff06e44cafcc6205d1be0258d","txids":[],"type":"block"},"type":"object"}
     let message = {"type":"getmempool"}
-    
+
+    client.write(JSON.stringify(block1) + "\n");
+    client.write(JSON.stringify(block2) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
+    client.write(JSON.stringify(message) + "\n");
+
 }
