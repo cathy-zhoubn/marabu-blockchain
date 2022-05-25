@@ -4,6 +4,7 @@ import { is_hex } from "./helpers";
 import * as ed from '@noble/ed25519';
 import { canonicalize } from "json-canonicalize";
 import { update_mempool } from "./mempool";
+import { max_height } from "./block";
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 
@@ -71,6 +72,7 @@ export function validate_coinbase(tx: any, socket:any) {
         socket_error(tx, socket, "Coinbase output does not have a valid pubkey");
         return false;
     }
+
     return true;
 }
 

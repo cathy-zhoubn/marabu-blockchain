@@ -23,6 +23,8 @@ export async function receive_block(data: any, socket: any) {
 
 export async function validate_block(data:any, socket:any){
     let blockid = hash_string(canonicalize(data));
+    if(blockid == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e") return true;
+
     if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
         socket_error(data, socket, "Block does not have valid target.");
         return false;
@@ -65,12 +67,12 @@ export async function validate_block(data:any, socket:any){
         }
     }
 
+    if (data.hasOwnProperty("miner") && (!is_ascii(data.miner) || data.miner.length > 128)){
 
-    if (data.hasOwnProperty("miner") && (!is_ascii(data) || data.miner.length > 128)){
         socket_error(data, socket, "Block has an invalid miner.");
         return false;
     }
-    if (data.hasOwnProperty("note") && (!is_ascii(data) || data.note.length > 128)){
+    if (data.hasOwnProperty("note") && (!is_ascii(data.note) || data.note.length > 128)){
         socket_error(data, socket, "Block has an invalid note.");
         return false;
     }
@@ -115,10 +117,8 @@ async function validate_txids(block:any, socket:any) {
     for (let i=0; i<block.txids.length; i++){
         let txid = block.txids[i];
         let tx = JSON.parse(await get_object(txid));
-        console.log("executing " + i)
         // this coinbase should be the first
         if ((!tx.hasOwnProperty("inputs")) && (tx.hasOwnProperty("height"))){
-            console.log("entered")
             // if coinbase is not the first
             if (i != 0){
                 socket_error(block, socket, "Coinbase transaction is not the first transaction in the block.");
@@ -205,7 +205,7 @@ async function validate_previd(previd: string, socket: any){
 }
 
 async function get_block_height(previd: string){
-    var previous = 0;
+    var previous = 1;
     while(true){
         let prev_block = JSON.parse(await get_object(previd));
         if(prev_block.previd == null){ //genesis
@@ -225,8 +225,6 @@ async function get_block_height(previd: string){
 async function check_timestamp(created: number, previd: string){
     var currentTime = + new Date();
     let prev_block = JSON.parse(await get_object(previd));
-    console.log(previd);
-    console.log(created + " " + prev_block.created + " " + currentTime);
     return (created > prev_block.created && created < currentTime);
 }
 
@@ -266,6 +264,3 @@ export async function receive_chaintip(blockid:any, socket:any){
         });
     }
 }
-
-
-
