@@ -268,9 +268,4 @@ export async function receive_chaintip(blockid:any, socket:any){
 }
 
 
-let tx101 = {"object":{"height":1,"outputs":[{"pubkey":"2564e783d664c41cee6cd044f53eb7a79f09866a7c66d47e1ac0747431e8ea7d","value":50000000000000}],"type":"transaction"},"type":"object"}
-      
-        // let x = validate_block(JSON.parse(), null);
-console.log(hash_string(canonicalize(tx101.object)));
 
-// console.log(x);

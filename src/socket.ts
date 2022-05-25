@@ -103,7 +103,7 @@ export async function process_data(data:any, socket:any){
         await receive_chaintip(data.blockid, socket);
     } else if (data.type == "mempool") {
         if (!data.hasOwnProperty("txids")) {
-            socket_error(data, socket, "mempool message does not contain 'mempool' field");
+            socket_error(data, socket, "mempool message does not contain 'txid' field");
             return;
         }
         get_objects_in_mempool(data.txids);
