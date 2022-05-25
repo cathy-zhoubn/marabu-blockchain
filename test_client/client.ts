@@ -34,10 +34,10 @@ client.connect({ port: port, host: host }, function() {
 
     test5_1();
     test5_2();
-    test5_3();
-    test5_4();
+    // test5_3();
+    // test5_4();
     test5_5();
-    test5_6();
+    // test5_6();
 
 
 });
@@ -399,7 +399,6 @@ function test5_5(){
     client.write(JSON.stringify(tx3) + "\n");
     client.write(JSON.stringify(tx4) + "\n");
     client.write(JSON.stringify(tx5) + "\n");
-
     client.write(JSON.stringify(block1) + "\n");
     client.write(JSON.stringify(block2) + "\n");
     client.write(JSON.stringify(block3) + "\n");
