@@ -33,11 +33,11 @@ client.connect({ port: port, host: host }, function() {
     // test3_failed();
 
     test5_1();
-    test5_2();
-    test5_3();
-    test5_4();
-    test5_5();
-    test5_6();
+    // test5_2();
+    // test5_3();
+    // test5_4();
+    // test5_5();
+    // test5_6();
 
 
 });
@@ -307,8 +307,9 @@ function test5_1() {
     client.write(JSON.stringify(tx1) + "\n");
     client.write(JSON.stringify(block2) + "\n");
     client.write(JSON.stringify(tx2) + "\n");
-    client.write(JSON.stringify(block3) + "\n");
+
     client.write(JSON.stringify(tx3) + "\n");
+    client.write(JSON.stringify(block3) + "\n");
     client.write(JSON.stringify(message3) + "\n");
     /* 
     expect    
@@ -353,7 +354,7 @@ function test5_3(){
 }
 
 function test5_4(){
-    let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653183619,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020bb67aa","note":"This block contains a long note which is more than 128 characters. Therefore, this block is an invalid block. You should ensure that the note and miner fields in a block are ASCII-printable strings up to 128 characters long each.","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":[],"type":"block"},"type":"object"}
+    let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653183619,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000020bb67aa","note":"This block contains a long note which is more than 128 characters. Therefore, this block is an invalid block. You should ensure that the note and miner fields in a block are ASCII-printable strings up to 128 characters long each.","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids": [] as any,"type":"block"},"type":"object"}
     
     client.write(JSON.stringify(block1) + "\n");
     /* 
@@ -395,8 +396,8 @@ function test5_5(){
 
 function test5_6(){
     let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653218978,"miner":"grader","nonce":"0000000000000000000000000000000000000000000000000000000003ee64f4","note":"New forth block","previd":"00000002237c6615963f45247b3b36a74f393003750ce1e158d955e2f470b97a","txids":["59a84565d9ce94fc44309715055859e21d53a89217fd151b7ba6369ac89da823"],"type":"block"},"type":"object"}
-    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219130,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000008e23df","note":"New fifth block","previd":"00000001b5d7cce513920e64f3d4ed0d21b0a1c99004803ba219f4941f61adc1","txids":[],"type":"block"},"type":"object"}
-    let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219149,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000f17794a4","note":"New sixth block","previd":"00000000bff3ae7c1b919013557f000e6e46e36ff06e44cafcc6205d1be0258d","txids":[],"type":"block"},"type":"object"}
+    let block2 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219130,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000008e23df","note":"New fifth block","previd":"00000001b5d7cce513920e64f3d4ed0d21b0a1c99004803ba219f4941f61adc1","txids":[] as any,"type":"block"},"type":"object"}
+    let block3 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653219149,"miner":"grader","nonce":"00000000000000000000000000000000000000000000000000000000f17794a4","note":"New sixth block","previd":"00000000bff3ae7c1b919013557f000e6e46e36ff06e44cafcc6205d1be0258d","txids":[] as any,"type":"block"},"type":"object"}
     let message = {"type":"getmempool"}
 
     client.write(JSON.stringify(block1) + "\n");

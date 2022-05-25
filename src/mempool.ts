@@ -81,6 +81,7 @@ export async function reorg_mempool(ctid_new:any, ctid_old:any, h_new:any, h_old
     // add tx in reorged blocks into mempool
     while(backward_stack.size){
         let temp_block:any = backward_stack.pop();
+        console.log(temp_block.txids);
         for (let txid of temp_block.txids){
             update_mempool(txid);
         }
