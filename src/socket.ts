@@ -2,7 +2,7 @@ import { send_object, send_getobject, receive_object} from './object';
 import {receive_hello, receive_getpeers, receive_peers} from './peers';
 import { send_chaintip, receive_chaintip} from './block';
 import { canonicalize } from 'json-canonicalize';
-import { get_objects_in_mempool } from './mempool';
+import { get_objects_in_mempool, send_mempool } from './mempool';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -107,9 +107,11 @@ export async function process_data(data:any, socket:any){
             return;
         }
         get_objects_in_mempool(data.txids);
-    } else if (data.type == "error") {
-    }
-    else {
+    } else if (data.type == "getmempool"){
+        send_mempool(socket);
+    }else if (data.type == "error") {
+
+    } else {
         socket_error(data, socket);
     }
 }

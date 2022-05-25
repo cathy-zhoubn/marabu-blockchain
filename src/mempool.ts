@@ -108,3 +108,11 @@ export function get_objects_in_mempool(txids:any) {
         });
     }
 }
+
+export function send_mempool(socket: any){
+    socket.write(send_format({
+        type: "mempool",
+        txids: mempool,
+    })
+);
+}
