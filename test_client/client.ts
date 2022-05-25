@@ -35,7 +35,7 @@ client.connect({ port: port, host: host }, function() {
     test5_1();
     test5_2();
     // test5_3();
-    // test5_4();
+    test5_4();
     // test5_5();
     // test5_6();
 

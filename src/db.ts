@@ -56,12 +56,16 @@ export async function has_object(objectid: string){
 export async function add_object(objectid: string, object: string){
   const text = ` INSERT INTO objects (object_id, object) VALUES($1, $2) ON CONFLICT (object_id) DO NOTHING;`;
   const values = [objectid, object];
-  try {
-    pool.query(text, values);
-  } catch(e) {
-    console.log("Failed to add IP")
-    return 0;
-  }
+
+  pool.query(text, values, (err : any, res : any) => {
+    if (err) {
+      //console.log("pg returned an error");
+      //throw err;
+    }
+    if (res) {
+      //console.log("pg returned a result from the SQL query");
+    }
+  });
 }
 
 export async function save_to_UTXO_table(blockid: string, utxo_set: Set<any>){
