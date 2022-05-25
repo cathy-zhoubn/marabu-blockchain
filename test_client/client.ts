@@ -30,7 +30,7 @@ client.connect({ port: port, host: host }, function() {
     // test3_block();
     // test3_failed()
 
-    test4_chain();
+    test3_failed();
 
 });
 
