@@ -14,13 +14,6 @@ export const checking_previd_received = new Map<string, boolean>();
 export let chain_tip:any = null; // blockid of the chain tip
 export let max_height:number = 0; // length of the longest chain
 
-export async function receive_block(data: any, socket: any) {
-    console.log(
-        `Received block message from : ${socket.remoteAddress}:${socket.remotePort}`
-    );
-    validate_block(data, socket);
-}
-
 export async function validate_block(data:any, socket:any){
     let blockid = hash_string(canonicalize(data));
     if(blockid == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e") return true;
