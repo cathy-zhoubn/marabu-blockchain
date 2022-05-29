@@ -207,12 +207,12 @@ export async function get_block_height(previd: string){
         if(prev_block.previd == null){ //genesis
             return previous;
         }
-        if(prev_block.txids.length > 0){
-            let tx = JSON.parse(await get_object(prev_block.txids[0]));
-            if(tx.hasOwnProperty("height")){
-                return previous + tx.height;
-            }
-        }
+        // if(prev_block.txids.length > 0){
+        //     let tx = JSON.parse(await get_object(prev_block.txids[0]));
+        //     if(tx.hasOwnProperty("height")){
+        //         return previous + tx.height;
+        //     }
+        // }
         previd = prev_block.previd;
         previous++;
     }
