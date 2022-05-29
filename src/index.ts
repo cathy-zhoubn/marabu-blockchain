@@ -4,11 +4,17 @@ import { expose } from "threads/worker"
 import { mine } from './mine_block';
   
 
-// expose(function server (){
-//     run_server();
-//     run_client();
-// })
+expose(function server (){
+    console.log("Starting server...");
+    run_server();
+    console.log("Server started.");
+    run_client();
+    console.log("Client started.");
+})
 
-run_server();
-run_client();
-mine();
+// run_server();
+// console.log('server started');
+// run_client();
+// console.log('client started');
+// mine();
+// console.log('miner started');
