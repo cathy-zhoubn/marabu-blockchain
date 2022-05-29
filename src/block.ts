@@ -6,6 +6,8 @@ import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
 import { mempool, reorg_mempool } from "./mempool";
+import { parentPort, workerData } from 'worker_threads';
+import { worker } from "./mine_block";
 
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
@@ -237,6 +239,8 @@ async function update_chain_tip(block: any, blockid:any, socket:any) {
         reorg_mempool(blockid, chain_tip, block_height, max_height, socket);
         max_height = block_height;
         chain_tip = blockid;
+        
+        parentPort.postMessage({"type": "chaintip", "blockid": blockid});
         console.log("New chain tip to update: " + blockid);
         return true;
     }
