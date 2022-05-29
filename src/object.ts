@@ -6,9 +6,9 @@ import { hash_string } from "./helpers";
 import { checking_previd, checking_previd_received, validate_block } from "./block";
 
 export function receive_object(object:string, socket:any){
-    console.log(
-        `Receivejson.d object message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `Received object message from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
 
     let obj_hash = hash_string(object);
     has_object(obj_hash).then(async (result) => {
@@ -47,9 +47,9 @@ export function receive_object(object:string, socket:any){
 }
 
 export function send_object(objid:any, socket: any) {
-    console.log(
-        `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `Received getobject message from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
     setTimeout(function(){
         has_object(objid).then((val) => {
             if (<any>val){

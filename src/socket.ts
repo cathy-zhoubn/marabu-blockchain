@@ -1,8 +1,9 @@
 import { send_object, send_getobject, receive_object} from './object';
-import {receive_hello, receive_getpeers, receive_peers} from './peers';
-import { send_chaintip, receive_chaintip} from './block';
+import { receive_hello, receive_getpeers, receive_peers} from './peers';
+import { send_chaintip, receive_chaintip, chain_tip, get_block_height} from './block';
 import { canonicalize } from 'json-canonicalize';
 import { get_objects_in_mempool, send_mempool } from './mempool';
+import { get_object } from './db';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -38,10 +39,10 @@ export function data_handler(
             let parsed = JSON.parse(token); //check if it can be parsed into json
             if (!parsed.hasOwnProperty("type")) {
                 //check if message contains 'type' field
-                console.log(
-                    `JSON message received from ${socket.remoteAddress}:${socket.remotePort} does not contain "type". Closing the socket.`
-                );
-                socket_error(parsed, socket);
+                // console.log(
+                //     `JSON message received from ${socket.remoteAddress}:${socket.remotePort} does not contain "type". Closing the socket.`
+                // );
+                // socket_error(parsed, socket);
                 return;
             }
             json_data_array.push(parsed);
@@ -89,9 +90,9 @@ export async function process_data(data:any, socket:any){
             return;
         }
         let objid = data.objectid;
-        console.log(
-            `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
-        );
+        // console.log(
+        //     `Received ihaveobject message from ${socket.remoteAddress}:${socket.remotePort}`
+        // );
         send_getobject(objid, socket);
     } else if (data.type == "getchaintip") {
         send_chaintip(socket);
@@ -100,7 +101,11 @@ export async function process_data(data:any, socket:any){
             socket_error(data, socket, "getchaintip message does not contain 'blockid' field");
             return;
         }
+        console.log("!!!CHAINTIP IS" + data.blockid);
+
         await receive_chaintip(data.blockid, socket);
+        console.log("our chaintip is " + chain_tip);
+        let cur = await get_object(chain_tip)
     } else if (data.type == "mempool") {
         if (!data.hasOwnProperty("txids")) {
             socket_error(data, socket, "mempool message does not contain 'txid' field");
@@ -118,15 +123,15 @@ export async function process_data(data:any, socket:any){
 
 export function socket_error(data:any, socket:any, message:string = "Unsupported message type received", kill:boolean = false){
 
-    console.log(
-        `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
-    );
-    console.log(data)
+    // console.log(
+    //     `Error {${message}} from ${socket.remoteAddress}:${socket.remotePort}. Closing the socket.`
+    // );
+    // console.log(data)
     let send_message = send_format({
         type: "error",
         error: message,
     })
-    console.log(send_message) 
+    // console.log(send_message) 
 
     if(kill){
         socket.end(send_message);
@@ -141,9 +146,9 @@ export function socket_handler(socket: any) {
     var initialized = {init: false};
     var leftover = { value: ""};
 
-    console.log(
-        `A new socket connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `A new socket connection has been established from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
     all_sockets.add(socket);
 
     //add_ip(socket.remoteAddress);socket.write
@@ -151,15 +156,19 @@ export function socket_handler(socket: any) {
     socket.write(send_format(get_peers));
     socket.write(send_format(get_chaintip));
     socket.write(send_format(get_mempool));
+    socket.write(send_format({
+        type: "getobject",
+        objectid: "0000000170ca89f3c6d0a4a6bf336f7bc3de0d3d68732c3ee671e4a200ecb6f1"
+    }));
 
     socket.on("data", function (chunk: any) {
         data_handler(chunk, leftover, socket, initialized)
     });
 
     socket.on("end", function (chunk: any) {
-        console.log(
-            `Closing connection with the client ${socket.remoteAddress}:${socket.remotePort}"`
-        );
+        // console.log(
+        //     `Closing connection with the client ${socket.remoteAddress}:${socket.remotePort}"`
+        // );
     });
 
     socket.on("error", function (err: any) {

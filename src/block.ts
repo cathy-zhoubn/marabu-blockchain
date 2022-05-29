@@ -197,10 +197,13 @@ async function validate_previd(previd: string, socket: any){
     return valid;
 }
 
-async function get_block_height(previd: string){
+export async function get_block_height(previd: string){
     var previous = 1;
     while(true){
+        let has_ob = await has_object(previd);
+        console.log("has_ob", has_ob); // TODO
         let prev_block = JSON.parse(await get_object(previd));
+        console.log("prev_block" + JSON.stringify(prev_block))
         if(prev_block.previd == null){ //genesis
             return previous;
         }
@@ -223,13 +226,16 @@ async function check_timestamp(created: number, previd: string){
 
 async function update_chain_tip(block: any, blockid:any, socket:any) {
     // if height is larger than previous, then it's a new chaintip!
+
     let block_height = await get_block_height(block.previd);
     if (block_height > max_height){
         reorg_mempool(blockid, chain_tip, block_height, max_height, socket);
         max_height = block_height;
         chain_tip = blockid;
         console.log("New chain tip to update: " + blockid);
+        return true;
     }
+    return false;
 }
 
 export function send_chaintip(socket: any) {
@@ -242,18 +248,30 @@ export function send_chaintip(socket: any) {
 
 export async function receive_chaintip(blockid:any, socket:any){
     // if chaintip is not the same as the current chain tip, then update
+    console.log("IN RECEIED CHAINITP FUNC");
+    console.log(blockid)
+    console.log(chain_tip)
     if (blockid != chain_tip){
-        await has_object(blockid).then(async (val) => {
-            if (<any>val){
-                // if we have object, then check if chain tip is up to date
-                await get_object(blockid).then(async (result) => {
-                    let block = JSON.parse(result);
-                    await update_chain_tip(block, blockid, socket);
-                });
-            } else {
-                // if we don't have object, then send getobject and validate
-                send_getobject(blockid, socket);
-            }
-        });
+        console.log("has this chaintip?" + await has_object(blockid));
+        if (await has_object(blockid)){
+            let block = JSON.parse(await get_object(blockid));
+            console.log("Received chaintip: " + JSON.stringify(block));
+            await update_chain_tip(block, blockid, socket);
+        }
+        else {
+            send_getobject(blockid, socket);
+        }
+        // await has_object(blockid).then(async (val) => {
+        //     if (<any>val){
+        //         // if we have object, then check if chain tip is up to date
+        //         await get_object(blockid).then(async (result) => {
+        //             let block = JSON.parse(result);
+        //             await update_chain_tip(block, blockid, socket);
+        //         });
+        //     } else {
+        //         // if we don't have object, then send getobject and validate
+        //         send_getobject(blockid, socket);
+        //     }
+        // });
     }
 }

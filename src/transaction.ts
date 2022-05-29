@@ -176,7 +176,6 @@ async function get_key_val(txid:string, index:number, socket:any){
 }
 
 function validate_tx_output(outputs: [any], socket:any) : number{
-    console.log("outputs: " + outputs);
     let sum = 0;
     for(let output of outputs){
         if (!validate_key(output.pubkey, socket)){

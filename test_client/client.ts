@@ -79,8 +79,6 @@ function test1() {
     // client.write(JSON.stringify({"type":"hello","version":"5.8.2"}) + "\n");
 }
 
-
-
 function test2_object_grader1() {
     let ob = { 
         "txids": [ "740bcfb434c89abe57bb2bc80290cd5495e87ebf8cd0dadb076bc50453590104" ], 
@@ -130,7 +128,6 @@ function test2_object_grader2(){
     }) + "\n");
 
 }
-
 
 let coinbase = {
     "object":{
@@ -292,7 +289,6 @@ function test4_chain(){
     
     client.write(JSON.stringify({"type": "getchaintip"}) + "\n");
 }
-
 
 function test5_1() {
     let block1 = {"object":{"T":"00000002af000000000000000000000000000000000000000000000000000000","created":1653114410,"miner":"grader","nonce":"000000000000000000000000000000000000000000000000000000006fba3415","note":"First block","previd":"00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e","txids":["3838027f66729e4d9408eef6460d64b7fb81a861ee9012a1549ecd7866a04097"],"type":"block"},"type":"object"}

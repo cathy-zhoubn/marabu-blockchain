@@ -4,9 +4,9 @@ import { run_one_client } from "./client";
 const version_re = /^0.8.\d$/;
 
 export function receive_hello(hello_data:any, socket:any) {
-    console.log(
-        `Received hello message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `Received hello message from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
     if (hello_data.type != "hello") {
         socket_error(hello_data, socket, "Received other message types before the initial handshake", true)
         return;
@@ -23,16 +23,16 @@ export function receive_hello(hello_data:any, socket:any) {
 }
 
 export function receive_getpeers(data:any, socket:any){
-    console.log(
-        `Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `Received getpeers message from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
     send_peers(socket);
 }
 
 export function receive_peers(data:any, socket:any){
-    console.log(
-        `Received peers message from ${socket.remoteAddress}:${socket.remotePort}`
-    );
+    // console.log(
+    //     `Received peers message from ${socket.remoteAddress}:${socket.remotePort}`
+    // );
     connect_to_peers(data.peers);
 }
 
