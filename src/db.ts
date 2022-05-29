@@ -68,6 +68,21 @@ export async function add_object(objectid: string, object: string){
   });
 }
 
+export async function add_mined_object(objectid: string, object: string){
+  const text = ` INSERT INTO mined_objects (object_id, object) VALUES($1, $2) ON CONFLICT (object_id) DO NOTHING;`;
+  const values = [objectid, object];
+
+  pool.query(text, values, (err : any, res : any) => {
+    if (err) {
+      //console.log("pg returned an error");
+      //throw err;
+    }
+    if (res) {
+      //console.log("pg returned a result from the SQL query");
+    }
+  });
+}
+
 export async function save_to_UTXO_table(blockid: string, utxo_set: Set<any>){
   utxo_set.forEach(async (outpoint_str) => {
     let outpoint = JSON.parse(outpoint_str)

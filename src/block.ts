@@ -19,54 +19,53 @@ export async function validate_block(data:any, socket:any){
     if(blockid == "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e") return true;
 
     if (!data.hasOwnProperty("T") || data.T != "00000002af000000000000000000000000000000000000000000000000000000"){
-        socket_error(data, socket, "Block does not have valid target.");
+        if (socket != null) socket_error(data, socket, "Block does not have valid target.");
         return false;
     }
     // Check proof of work
     if (!valid_pow(data, blockid, socket)) return false; 
     if (!data.hasOwnProperty("created") || typeof data.created != "number"){
-        socket_error(data, socket, "Block does not have a valid timestamp.");
+        if (socket != null) socket_error(data, socket, "Block does not have a valid timestamp.");
         return false;
     }
 
     if (!data.hasOwnProperty("txids") || !Array.isArray(data.txids)){
-        socket_error(data, socket, "Block does not have a valid list of txids.");
+        if (socket != null) socket_error(data, socket, "Block does not have a valid list of txids.");
         return false;
     }
     if (!data.hasOwnProperty("nonce") || !is_hex(data.nonce, socket) || data.nonce.length != 64){
-        socket_error(data, socket, "Block does not have a valid nonce.");
+        if (socket != null) socket_error(data, socket, "Block does not have a valid nonce.");
         return false;
     }
     if (!data.hasOwnProperty("previd")){
-        socket_error(data, socket, "Block does not have a valid previd.");
+        if (socket != null) socket_error(data, socket, "Block does not have a valid previd.");
         return false;
     } 
     if (data.previd == null){
         if (!validate_genesis(data, socket)) return false;
     } else {
         if ((!is_hex(data.previd, socket) || data.previd.length != 64)){
-            socket_error(data, socket, "Block does not have a valid previd.");
+            if (socket != null) socket_error(data, socket, "Block does not have a valid previd.");
             return false;
         } 
     
         if(!await validate_previd(data.previd, socket)) {  //recursively check previd
-            socket_error(data, socket, "Some previous blocks are invalid");
+            if (socket != null) socket_error(data, socket, "Some previous blocks are invalid");
             return false;
         }
 
         if (!await check_timestamp(data.created, data.previd)){
-            socket_error(data, socket, "Invalid creation time");
+            if (socket != null) socket_error(data, socket, "Invalid creation time");
             return false;
         }
     }
 
     if (data.hasOwnProperty("miner") && (!is_ascii(data.miner) || data.miner.length > 128)){
-
-        socket_error(data, socket, "Block has an invalid miner.");
+        if (socket != null) socket_error(data, socket, "Block has an invalid miner.");
         return false;
     }
     if (data.hasOwnProperty("note") && (!is_ascii(data.note) || data.note.length > 128)){
-        socket_error(data, socket, "Block has an invalid note.");
+        if (socket != null) socket_error(data, socket, "Block has an invalid note.");
         return false;
     }
     // validate all txids
@@ -82,11 +81,13 @@ export async function validate_block(data:any, socket:any){
 
 }
 
-function valid_pow(block: any, blockid:string, socket: any) {
+export function valid_pow(block: any, blockid:string, socket: any) {
     let blockid_num = parseInt(blockid, 16);
     let target_num = parseInt(block.T, 16);
     if (blockid_num >= target_num){
-        socket_error(block, socket, "Block does not meet proof of work requirements.");
+        if (socket != null){
+            socket_error(block, socket, "Block does not meet proof of work requirements.");
+        }
         return false;
     }
     return true;
@@ -219,7 +220,7 @@ export async function get_block_height(previd: string){
 }
 
 async function check_timestamp(created: number, previd: string){
-    var currentTime = + new Date();
+    var currentTime = (+ new Date()) / 1000;
     let prev_block = JSON.parse(await get_object(previd));
     return (created > prev_block.created && created < currentTime);
 }

@@ -31,6 +31,8 @@
     "pg": "^8.7.3",
     "queue": "^6.0.2",
     "stack-typescript": "^1.0.4",
+    "threads": "^1.7.0",
+    "tiny-worker": "^2.3.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },

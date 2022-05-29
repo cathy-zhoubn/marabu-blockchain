@@ -12,7 +12,9 @@ export const privateKey = ed.utils.randomPrivateKey();
 
 export async function validate_tx_object(tx:any, socket:any) {
     if (!tx.hasOwnProperty("outputs")){
-        socket_error(tx, socket, "Transaction object does not have outputs");
+        if (socket != null){
+            socket_error(tx, socket, "Transaction object does not have outputs");
+        }
         return false;
     }
     for(let output of tx.outputs){
@@ -21,7 +23,9 @@ export async function validate_tx_object(tx:any, socket:any) {
             console.log("output: " + output.value);
             console.log("type: " + typeof output.value);
             console.log(validate_key(output.pubkey, socket))
-            socket_error(tx, socket, "Some transaction output does not have correct pubkey or value");
+            if (socket != null){
+                socket_error(tx, socket, "Some transaction output does not have correct pubkey or value");
+            }
             return false;
         }
     }
@@ -32,7 +36,9 @@ export async function validate_tx_object(tx:any, socket:any) {
 
     else if (tx.hasOwnProperty("inputs")){
         if(tx.inputs.length == 0){
-            socket_error(tx, socket, "Transaction does not have any inputs");
+            if (socket != null){
+                socket_error(tx, socket, "Transaction does not have any inputs");
+            }
             return false;
         }
         if(await validate_transaction(tx, socket)){
@@ -43,7 +49,9 @@ export async function validate_tx_object(tx:any, socket:any) {
         }
     }
     
-    socket_error(socket, "Transaction object does not include required keys");
+    if (socket != null){
+        socket_error(socket, "Transaction object does not include required keys");
+    }
     return false;
 }
 
