@@ -2,8 +2,9 @@ import { send_object, send_getobject, receive_object} from './object';
 import { receive_hello, receive_getpeers, receive_peers} from './peers';
 import { send_chaintip, receive_chaintip, chain_tip, get_block_height} from './block';
 import { canonicalize } from 'json-canonicalize';
-import { get_objects_in_mempool, send_mempool } from './mempool';
+import { get_objects_in_mempool, mempool, send_mempool } from './mempool';
 import { get_object } from './db';
+import { memoryUsage } from 'process';
 
 export const hello = { type: "hello", version: "0.8.0", agent: "Old Peking" };
 export const get_peers = { type: "getpeers" };
@@ -105,7 +106,6 @@ export async function process_data(data:any, socket:any){
 
         await receive_chaintip(data.blockid, socket);
         console.log("our chaintip is " + chain_tip);
-        let cur = await get_object(chain_tip)
     } else if (data.type == "mempool") {
         if (!data.hasOwnProperty("txids")) {
             socket_error(data, socket, "mempool message does not contain 'txid' field");

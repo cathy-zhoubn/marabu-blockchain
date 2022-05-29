@@ -5,7 +5,7 @@ import { has_object, get_object } from "./db";
 import { send_getobject } from "./object";
 import { validate_coinbase } from "./transaction";
 import { validate_UTXO } from "./utxo";
-import { reorg_mempool } from "./mempool";
+import { mempool, reorg_mempool } from "./mempool";
 
 const coinbase_reward = 50e12;
 export const checking_previd = new Set();
@@ -228,6 +228,10 @@ async function update_chain_tip(block: any, blockid:any, socket:any) {
     // if height is larger than previous, then it's a new chaintip!
 
     let block_height = await get_block_height(block.previd);
+    console.log("block height " + block_height)
+
+    console.log("our mempool is " + JSON.stringify(mempool));
+    console.log("with the block" + JSON.stringify(block))
     if (block_height > max_height){
         reorg_mempool(blockid, chain_tip, block_height, max_height, socket);
         max_height = block_height;
@@ -252,7 +256,7 @@ export async function receive_chaintip(blockid:any, socket:any){
     console.log(blockid)
     console.log(chain_tip)
     if (blockid != chain_tip){
-        console.log("has this chaintip?" + await has_object(blockid));
+        console.log("has this chaintip?" + await has_object(chain_tip));
         if (await has_object(blockid)){
             let block = JSON.parse(await get_object(blockid));
             console.log("Received chaintip: " + JSON.stringify(block));
