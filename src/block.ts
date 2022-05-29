@@ -266,17 +266,17 @@ export async function receive_chaintip(blockid:any, socket:any){
         else {
             send_getobject(blockid, socket);
         }
-        // await has_object(blockid).then(async (val) => {
-        //     if (<any>val){
-        //         // if we have object, then check if chain tip is up to date
-        //         await get_object(blockid).then(async (result) => {
-        //             let block = JSON.parse(result);
-        //             await update_chain_tip(block, blockid, socket);
-        //         });
-        //     } else {
-        //         // if we don't have object, then send getobject and validate
-        //         send_getobject(blockid, socket);
-        //     }
-        // });
+        await has_object(blockid).then(async (val) => {
+            if (<any>val){
+                // if we have object, then check if chain tip is up to date
+                await get_object(blockid).then(async (result) => {
+                    let block = JSON.parse(result);
+                    await update_chain_tip(block, blockid, socket);
+                });
+            } else {
+                // if we don't have object, then send getobject and validate
+                send_getobject(blockid, socket);
+            }
+        });
     }
 }
