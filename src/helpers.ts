@@ -31,3 +31,11 @@ export function is_ascii(key:string){
     }
     return true;
 }
+
+const me = nacl.box.keyPair();
+me.publicKey = Buffer.from(me.publicKey).toString('hex');
+me.secretKey = Buffer.from(me.secretKey).toString('hex');
+console.log(me);
+
+
+
